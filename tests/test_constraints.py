@@ -64,3 +64,107 @@ class TestSchedulingConstraints:
         ]
         
         assert SchedulingConstraints.validate_consecutive_shifts(shifts, test_resident) == True
+
+def test_validate_night_to_day_transition(self, test_resident, base_date):
+    """Test transition from night shifts to day shifts requires 48h rest"""
+    shifts = [
+        # Block of night shifts
+        Shift(
+            date=base_date,
+            shift_type=ShiftType.NIGHT,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        ),
+        # Trying to start day shifts too soon (only 24h after last night)
+        Shift(
+            date=base_date + timedelta(days=2),  # This is too soon
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        )
+    ]
+    assert SchedulingConstraints.validate_shift_transitions(shifts, test_resident) == False
+
+def test_validate_night_to_day_transition_valid(self, test_resident, base_date):
+    """Test valid transition from night shifts to day shifts with 48h rest"""
+    shifts = [
+        # Block of night shifts
+        Shift(
+            date=base_date,
+            shift_type=ShiftType.NIGHT,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        ),
+        # Starting day shifts after proper rest (48h after last night shift ends)
+        Shift(
+            date=base_date + timedelta(days=3),  # This is good - full 48h after last night shift ends
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        )
+    ]
+    assert SchedulingConstraints.validate_shift_transitions(shifts, test_resident) == True
+
+def test_validate_day_to_night_transition(self, test_resident, base_date):
+    """Test transition from day shifts to night shifts requires 48h rest"""
+    shifts = [
+        # Block of day shifts
+        Shift(
+            date=base_date,
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        ),
+        # Trying to start night shifts too soon
+        Shift(
+            date=base_date + timedelta(days=2),  # This is too soon
+            shift_type=ShiftType.NIGHT,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        )
+    ]
+    assert SchedulingConstraints.validate_shift_transitions(shifts, test_resident) == False
+
+def test_validate_day_to_night_transition_valid(self, test_resident, base_date):
+    """Test valid transition from day shifts to night shifts with 48h rest"""
+    shifts = [
+        # Block of day shifts
+        Shift(
+            date=base_date,
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        ),
+        # Starting night shifts after proper rest
+        Shift(
+            date=base_date + timedelta(days=3),  # This is good - full 48h rest
+            shift_type=ShiftType.NIGHT,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        )
+    ]
+    assert SchedulingConstraints.validate_shift_transitions(shifts, test_resident) == True
+
+def test_consecutive_shifts_same_type_valid(self, test_resident, base_date):
+    """Test that consecutive shifts of the same type are allowed"""
+    # Test consecutive night shifts
+    night_shifts = [
+        Shift(
+            date=base_date + timedelta(days=i),
+            shift_type=ShiftType.NIGHT,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        ) for i in range(3)
+    ]
+    assert SchedulingConstraints.validate_shift_transitions(night_shifts, test_resident) == True
+
+    # Test consecutive day shifts
+    day_shifts = [
+        Shift(
+            date=base_date + timedelta(days=i),
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        ) for i in range(3)
+    ]
+    assert SchedulingConstraints.validate_shift_transitions(day_shifts, test_resident) == True

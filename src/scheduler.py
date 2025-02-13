@@ -1,11 +1,10 @@
 from typing import List, Dict
-import datetime
+from datetime import datetime, timedelta
 from src.models import *
 
 class SchedulingConstraints:
     MAX_CONSECUTIVE_SHIFTS = 6
-    MIN_REST_HOURS = 48  # Default rest period
-    MIN_REST_HOURS_MONDAY_NIGHT = 24  # Special case for Monday night to Wednesday day
+    SHIFT_TRANSITION_REST_HOURS = 48  # Default rest period
     
     @staticmethod
     def validate_consecutive_shifts(schedule: List[Shift], resident: Resident) -> bool:
@@ -42,6 +41,47 @@ class SchedulingConstraints:
             else:
                 consecutive_count = 1
                 
+        return True
+
+    @staticmethod
+    def validate_shift_transitions(schedule: List[Shift], resident: Resident) -> bool:
+        """
+        Validates that proper rest periods are maintained when transitioning between shift types.
+        
+        Rules:
+        - When transitioning from night shifts to day shifts, need 48 hours from end of last
+          night shift (7am) to start of first day shift (7am)
+        - When transitioning from day shifts to night shifts, need 48 hours from end of last
+          day shift (7pm) to start of first night shift (7pm)
+        """
+        # Get all shifts for this resident, sorted by date
+        resident_shifts = sorted(
+            [shift for shift in schedule if shift.resident == resident],
+            key=lambda x: x.date
+        )
+        
+        for i in range(len(resident_shifts)-1):
+            current_shift = resident_shifts[i]
+            next_shift = resident_shifts[i+1]
+            
+            # Only check when shift types are different
+            if current_shift.shift_type != next_shift.shift_type:
+                
+                # Calculate shift end and start times
+                if current_shift.shift_type == ShiftType.NIGHT:
+                    # Night shift ends at 7am next day
+                    current_shift_end = current_shift.date + timedelta(days=1, hours=7)
+                    next_shift_start = next_shift.date + timedelta(hours=7)  # Day shift starts at 7am
+                else:  # current_shift is DAY
+                    # Day shift ends at 7pm
+                    current_shift_end = current_shift.date + timedelta(hours=19)
+                    next_shift_start = next_shift.date + timedelta(hours=19)  # Night shift starts at 7pm
+                
+                hours_between = (next_shift_start - current_shift_end).total_seconds() / 3600
+                
+                if hours_between < SchedulingConstraints.SHIFT_TRANSITION_REST_HOURS:
+                    return False
+                    
         return True
 
 class Scheduler:
