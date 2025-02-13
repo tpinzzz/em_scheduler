@@ -1,0 +1,44 @@
+{
+    "residents": [
+      {
+        "id": "R001",
+        "name": "John Smith",
+        "level": "PGY1",
+        "pod_preferences": ["PURPLE", "ORANGE"],
+        "time_off": [
+          {
+            "start_date": "2025-02-01",
+            "end_date": "2025-02-03",
+            "is_pto": true
+          }
+        ]
+      },
+      {
+        "id": "R002",
+        "name": "Jane Doe",
+        "level": "PGY2",
+        "pod_preferences": ["ORANGE", "PURPLE"],
+        "time_off": []
+      },
+      {
+        "id": "R003",
+        "name": "Bob Johnson",
+        "level": "PGY3",
+        "pod_preferences": ["PURPLE", "ORANGE"],
+        "time_off": [
+          {
+            "start_date": "2025-02-15",
+            "end_date": "2025-02-15",
+            "is_pto": false
+          }
+        ]
+      },
+      {
+        "id": "R004",
+        "name": "Sarah Wilson",
+        "level": "OFF_SERVICE",
+        "pod_preferences": ["ORANGE", "PURPLE"],
+        "time_off": []
+      }
+    ]
+  }
