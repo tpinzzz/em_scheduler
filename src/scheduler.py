@@ -1,6 +1,6 @@
 from typing import List, Dict
 from datetime import datetime, timedelta
-from src.models import *
+from models import *
 
 class SchedulingConstraints:
     MAX_CONSECUTIVE_SHIFTS = 6
@@ -83,6 +83,32 @@ class SchedulingConstraints:
                     return False
                     
         return True
+    
+    @staticmethod
+    def validate_time_off(schedule: List[Shift], resident: Resident) -> bool:
+        """
+        Validates that a resident is not scheduled during their time off periods.
+        Both PTO (Paid Time Off) and RTO (Required Time Off) are treated the same.
+        
+        Args:
+            schedule: List of all shifts in the schedule
+            resident: The resident to check
+            
+        Returns:
+            bool: True if no shifts are scheduled during time off, False otherwise
+        """
+        # Get all shifts for this resident
+        resident_shifts = [shift for shift in schedule if shift.resident == resident]
+        
+        # Check each shift against all time off periods
+        for shift in resident_shifts:
+            for time_off in resident.time_off:
+                # A shift conflicts if it's on any day within the time off period
+                if (time_off.start_date.date() <= shift.date.date() <= 
+                    time_off.end_date.date()):
+                    return False
+                    
+        return True
 
 class Scheduler:
     def __init__(self, residents: List[Resident], month: int, year: int):
@@ -128,5 +154,9 @@ class Scheduler:
         """Validates the complete schedule against all constraints."""
         for resident in self.residents:
             if not self.constraints.validate_consecutive_shifts(schedule, resident):
+                return False
+            if not self.constraints.validate_shift_transitions(schedule, resident):
+                return False
+            if not self.constraints.validate_time_off(schedule, resident):
                 return False
         return True

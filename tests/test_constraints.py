@@ -168,3 +168,107 @@ def test_consecutive_shifts_same_type_valid(self, test_resident, base_date):
         ) for i in range(3)
     ]
     assert SchedulingConstraints.validate_shift_transitions(day_shifts, test_resident) == True
+
+def test_validate_pto_single_day(self, test_resident, base_date):
+    """Test that resident isn't scheduled during single day PTO"""
+    # Add PTO for the test resident
+    test_resident.time_off = [
+        TimeOff(
+            start_date=base_date + timedelta(days=1),
+            end_date=base_date + timedelta(days=1),
+            is_pto=True
+        )
+    ]
+    
+    # Try to schedule a shift during PTO
+    shifts = [
+        Shift(
+            date=base_date + timedelta(days=1),
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        )
+    ]
+    assert SchedulingConstraints.validate_time_off(shifts, test_resident) == False
+
+def test_validate_pto_multiple_days(self, test_resident, base_date):
+    """Test that resident isn't scheduled during multi-day PTO"""
+    # Add PTO for the test resident
+    test_resident.time_off = [
+        TimeOff(
+            start_date=base_date + timedelta(days=1),
+            end_date=base_date + timedelta(days=3),
+            is_pto=True
+        )
+    ]
+    
+    # Try to schedule shifts before, during, and after PTO
+    shifts = [
+        # Before PTO (valid)
+        Shift(
+            date=base_date,
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        ),
+        # During PTO (invalid)
+        Shift(
+            date=base_date + timedelta(days=2),
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        ),
+        # After PTO (valid)
+        Shift(
+            date=base_date + timedelta(days=4),
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        )
+    ]
+    assert SchedulingConstraints.validate_time_off(shifts, test_resident) == False
+
+def test_validate_rto_same_as_pto(self, test_resident, base_date):
+    """Test that RTO is treated the same as PTO for scheduling"""
+    # Add RTO for the test resident
+    test_resident.time_off = [
+        TimeOff(
+            start_date=base_date + timedelta(days=1),
+            end_date=base_date + timedelta(days=1),
+            is_pto=False  # RTO
+        )
+    ]
+    
+    # Try to schedule a shift during RTO
+    shifts = [
+        Shift(
+            date=base_date + timedelta(days=1),
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        )
+    ]
+    assert SchedulingConstraints.validate_time_off(shifts, test_resident) == False
+
+def test_validate_no_time_off_conflicts(self, test_resident, base_date):
+    """Test that scheduling works normally when there's no time off conflict"""
+    # Add PTO for later dates
+    test_resident.time_off = [
+        TimeOff(
+            start_date=base_date + timedelta(days=10),
+            end_date=base_date + timedelta(days=12),
+            is_pto=True
+        )
+    ]
+    
+    # Schedule shifts not during PTO
+    shifts = [
+        Shift(
+            date=base_date + timedelta(days=i),
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        )
+        for i in range(3)  # Three shifts before PTO starts
+    ]
+    assert SchedulingConstraints.validate_time_off(shifts, test_resident) == True
