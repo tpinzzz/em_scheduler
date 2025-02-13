@@ -1,6 +1,6 @@
 from typing import List, Dict
 import datetime
-from models import *
+from src.models import *
 
 class SchedulingConstraints:
     MAX_CONSECUTIVE_SHIFTS = 6

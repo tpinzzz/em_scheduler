@@ -1,12 +1,45 @@
-from models import *
-from scheduler import Scheduler
+from src.models import *
+from src.scheduler import Scheduler
 import json
 from datetime import datetime
 
 def load_residents() -> List[Resident]:
     """Load resident data from configuration file."""
-    # Implementation to load resident data
-    pass
+    try:
+        with open('data/residents.json', 'r') as f:
+            data = json.load(f)
+        
+        residents = []
+        for r in data['residents']:
+            # Convert time_off strings to datetime objects
+            time_off_list = []
+            for to in r['time_off']:
+                time_off_list.append(
+                    TimeOff(
+                        start_date=datetime.fromisoformat(to['start_date']),
+                        end_date=datetime.fromisoformat(to['end_date']),
+                        is_pto=to['is_pto']
+                    )
+                )
+            
+            # Create resident object
+            resident = Resident(
+                id=r['id'],
+                name=r['name'],
+                level=ResidentLevel[r['level']],
+                pod_preferences=[Pod[p] for p in r['pod_preferences']],
+                time_off=time_off_list
+            )
+            residents.append(resident)
+        
+        return residents
+    except FileNotFoundError:
+        print("Warning: residents.json not found. Using empty resident list.")
+        return []
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Error parsing residents.json: {e}")
+    except KeyError as e:
+        raise ValueError(f"Missing required field in residents.json: {e}")
 
 def save_schedule(schedule: List[Shift], filename: str):
     """Save generated schedule to JSON file."""
