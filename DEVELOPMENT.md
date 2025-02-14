@@ -66,3 +66,15 @@ em_scheduler/
 - Basic error handling in place for data loading
 - All resident types and shift requirements updated
 - PTO/RTO rules documented in models.py
+
+
+## Future Refactoring Considerations
+### Shift Time Calculations
+- Current shift time logic in validate_shift_transitions is complex and error-prone
+- Consider adding get_start_time() and get_end_time() methods to Shift class
+- Would make time period calculations more explicit and maintainable
+- Could improve test readability
+
+### Priority:
+- Medium: Not blocking functionality but would improve maintainability
+- Consider after core scheduling algorithm is complete
