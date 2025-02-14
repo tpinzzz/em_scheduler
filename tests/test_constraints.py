@@ -97,7 +97,7 @@ class TestSchedulingConstraints:
             ),
             # Starting day shifts after proper rest (48h after last night shift ends)
             Shift(
-                date=base_date + timedelta(days=2),  # This is good - full 48h after last night shift ends
+                date=base_date + timedelta(days=3),  # This was tricky because when it goes from night to day we must used a time delta of days 3 vs days 2 like the case from day to night.
                 shift_type=ShiftType.DAY,
                 pod=Pod.PURPLE,
                 resident=test_resident
