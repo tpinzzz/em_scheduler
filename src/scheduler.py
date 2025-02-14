@@ -163,6 +163,52 @@ class Scheduler:
                 shifts[r_idx][shift_key] = model.NewBoolVar(
                     f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
                 )
+        # Each shift must have at least one resident
+        for shift in empty_schedule:
+            shift_key = (shift.date.day, shift.shift_type, shift.pod)
+            model.Add(sum(shifts[r_idx][shift_key] 
+                 for r_idx in range(len(self.residents))) >= 1)
+
+        # PGY1 Supervision: If a PGY1 is assigned and needs supervision, ensure there's a supervisor
+        for shift in empty_schedule:
+            shift_key = (shift.date.day, shift.shift_type, shift.pod)
+            
+            # For each PGY1 resident
+            for r_idx, resident in enumerate(self.residents):
+                if resident.level == ResidentLevel.PGY1:
+                    # If this PGY1 needs supervision for this shift
+                    if self.constraints.needs_supervision(resident, shift.pod, self.month):
+                        # Sum of non-PGY1 residents assigned to this shift
+                        supervisors = sum(
+                            shifts[other_idx][shift_key]
+                            for other_idx, other_resident in enumerate(self.residents)
+                            if other_resident.level != ResidentLevel.PGY1
+                        )
+                        
+                        # If PGY1 is assigned (1), there must be at least one supervisor
+                        model.Add(supervisors >= shifts[r_idx][shift_key])
+            # Each resident can only be assigned to one shift per day
+            for r_idx in range(len(self.residents)):
+                for day in range(1, calendar.monthrange(self.year, self.month)[1] + 1):
+                    day_shifts = [
+                        shifts[r_idx][key]
+                        for key in shifts[r_idx].keys()
+                        if key[0] == day
+                    ]
+                    if day_shifts:  # Only add constraint if there are shifts that day
+                        model.Add(sum(day_shifts) <= 1)
+            
+            # Each resident must work their required number of shifts
+            for r_idx, resident in enumerate(self.residents):
+                required_shifts = resident.get_required_shifts(self.month, self.year)
+                total_shifts = sum(shifts[r_idx].values())
+                model.Add(total_shifts == required_shifts)
+
+            # Create solver
+            solver = cp_model.CpSolver()
+            solver.parameters.max_time_in_seconds = 60  # Limit solve time to 1 minute
+            
+            return model, solver, shifts
 
 
     def generate_schedule(self) -> List[Shift]:
