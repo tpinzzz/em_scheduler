@@ -1,10 +1,36 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from datetime import datetime, timedelta
+import calendar
+from ortools.sat.python import cp_model
 from src.models import *
 
 class SchedulingConstraints:
     MAX_CONSECUTIVE_SHIFTS = 6
     SHIFT_TRANSITION_REST_HOURS = 48  # Default rest period
+
+    @staticmethod
+    def needs_supervision(resident: Resident, pod: Pod, month: int) -> bool:
+        """
+        Determines if a PGY1 resident needs supervision for the given pod.
+        
+        Rules:
+        - PGY1s need supervision in all pods July-December
+        - PGY1s need supervision in PURPLE pod January-June
+        - PGY1s can work alone in ORANGE pod January-June
+        - Other residents don't need supervision
+        """
+        if resident.level != ResidentLevel.PGY1:
+            return False
+            
+        # Residency year starts in July
+        is_first_half = month >= 7 and month <= 12
+        
+        # First half of year - need supervision everywhere
+        if is_first_half:
+            return True
+        
+        # Second half of year - only need supervision in PURPLE pod
+        return pod == Pod.PURPLE
     
     @staticmethod
     def validate_consecutive_shifts(schedule: List[Shift], resident: Resident) -> bool:
@@ -116,20 +142,88 @@ class Scheduler:
         self.month = month
         self.year = year
         self.constraints = SchedulingConstraints()
-        
+
+    def _setup_solver(self) -> Tuple[cp_model.CpModel, cp_model.CpSolver, Dict]:
+        """
+        Sets up the CP-SAT solver with variables and constraints for the schedule.
+        Returns the model, solver, and shift variables.
+        """
+
+        model = cp_model.CpModel()
+
+        #Get empty schedule to understand structure
+        empty_schedule = self._initialize_empty_schedule()
+
+        # Create variables: binary variable for each (resident, shift) pair
+        shifts = {}
+        for r_idx, resident in enumerate(self.residents):
+            shifts[r_idx] = {}
+            for shift in empty_schedule:
+                shift_key = (shift.date.day, shift.shift_type, shift.pod)
+                shifts[r_idx][shift_key] = model.NewBoolVar(
+                    f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
+                )
+        # Each shift must have at least one resident
+        for shift in empty_schedule:
+            shift_key = (shift.date.day, shift.shift_type, shift.pod)
+            model.Add(sum(shifts[r_idx][shift_key] 
+                 for r_idx in range(len(self.residents))) >= 1)
+
+        # PGY1 Supervision: If a PGY1 is assigned and needs supervision, ensure there's a supervisor
+        for shift in empty_schedule:
+            shift_key = (shift.date.day, shift.shift_type, shift.pod)
+            
+            # For each PGY1 resident
+            for r_idx, resident in enumerate(self.residents):
+                if resident.level == ResidentLevel.PGY1:
+                    # If this PGY1 needs supervision for this shift
+                    if self.constraints.needs_supervision(resident, shift.pod, self.month):
+                        # Sum of non-PGY1 residents assigned to this shift
+                        supervisors = sum(
+                            shifts[other_idx][shift_key]
+                            for other_idx, other_resident in enumerate(self.residents)
+                            if other_resident.level != ResidentLevel.PGY1
+                        )
+                        
+                        # If PGY1 is assigned (1), there must be at least one supervisor
+                        model.Add(supervisors >= shifts[r_idx][shift_key])
+            # Each resident can only be assigned to one shift per day
+            for r_idx in range(len(self.residents)):
+                for day in range(1, calendar.monthrange(self.year, self.month)[1] + 1):
+                    day_shifts = [
+                        shifts[r_idx][key]
+                        for key in shifts[r_idx].keys()
+                        if key[0] == day
+                    ]
+                    if day_shifts:  # Only add constraint if there are shifts that day
+                        model.Add(sum(day_shifts) <= 1)
+            
+            # Each resident must work their required number of shifts
+            for r_idx, resident in enumerate(self.residents):
+                required_shifts = resident.get_required_shifts(self.month, self.year)
+                total_shifts = sum(shifts[r_idx].values())
+                model.Add(total_shifts == required_shifts)
+
+            # Create solver
+            solver = cp_model.CpSolver()
+            solver.parameters.max_time_in_seconds = 60  # Limit solve time to 1 minute
+            
+            return model, solver, shifts
+
+
     def generate_schedule(self) -> List[Shift]:
         """
         Main scheduling algorithm using constraint satisfaction.
         Returns a list of shifts with assigned residents.
         """
-        schedule = self._initialize_empty_schedule()
+        empty_schedule = self._initialize_empty_schedule()
         
         # Use Google OR-Tools for constraint satisfaction
-        solver = self._setup_solver()
-        solution = self._solve_constraints(solver)
-        
-        if solution:
-            return self._convert_solution_to_schedule(solution)
+        model, solver, shift_vars = self._setup_solver()
+        status = solver.Solve(model) #status check
+
+        if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+            return self._convert_solution_to_schedule(solver, shift_vars, empty_schedule)
         else:
             raise ValueError("No valid schedule found satisfying all constraints")
     
