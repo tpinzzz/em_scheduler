@@ -18,6 +18,7 @@ class ResidentLevel(Enum):
     PGY3 = "pgy3"
     OFF_SERVICE = "off_service"
     TY = "ty"
+    CHIEF ="chief"
 
 @dataclass
 class TimeOff:
@@ -39,7 +40,8 @@ class Resident:
             ResidentLevel.PGY2: 17,
             ResidentLevel.PGY3: 16,
             ResidentLevel.OFF_SERVICE: 13,
-            ResidentLevel.TY: 13
+            ResidentLevel.TY: 13,
+            ResidentLevel.CHIEF: 15 
         }
         
         # Calculate PTO reduction
