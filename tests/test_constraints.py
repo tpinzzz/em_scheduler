@@ -272,3 +272,71 @@ def test_validate_no_time_off_conflicts(self, test_resident, base_date):
         for i in range(3)  # Three shifts before PTO starts
     ]
     assert SchedulingConstraints.validate_time_off(shifts, test_resident) == True
+
+    def test_five_pto_with_two_rto(self, test_resident, base_date):
+    """Test the 5 PTO + 2 RTO scenario - should block all 7 days"""
+    # Set up a 5-day PTO block followed by 2 RTO days
+    test_resident.time_off = [
+        TimeOff(
+            start_date=base_date,
+            end_date=base_date + timedelta(days=4),
+            is_pto=True
+        ),
+        TimeOff(
+            start_date=base_date + timedelta(days=5),
+            end_date=base_date + timedelta(days=6),
+            is_pto=False  # RTO
+        )
+    ]
+    
+    # Try to schedule shifts during the 7-day period
+    shifts = [
+        Shift(
+            date=base_date + timedelta(days=i),
+            shift_type=ShiftType.DAY,
+            pod=Pod.PURPLE,
+            resident=test_resident
+        )
+        for i in range(7)  # Try scheduling all 7 days
+    ]
+    
+    assert SchedulingConstraints.validate_time_off(shifts, test_resident) == False
+
+def test_five_pto_shift_reduction(self, test_resident, base_date):
+    """Test that 5 PTO days reduces shifts by 5 regardless of the 2 RTO days"""
+    # Create a PGY2 resident (base 17 shifts)
+    test_resident.level = ResidentLevel.PGY2
+    
+    # Set up a 5-day PTO block followed by 2 RTO days
+    test_resident.time_off = [
+        TimeOff(
+            start_date=base_date,
+            end_date=base_date + timedelta(days=4),
+            is_pto=True
+        ),
+        TimeOff(
+            start_date=base_date + timedelta(days=5),
+            end_date=base_date + timedelta(days=6),
+            is_pto=False  # RTO
+        )
+    ]
+    
+    # Should reduce from 17 to 12 shifts (17 base - 5 PTO days)
+    assert test_resident.get_required_shifts(base_date.month, base_date.year) == 12
+
+def test_chief_minimum_shifts(self, test_resident, base_date):
+    """Test that chiefs can reduce to 10 shifts with PTO"""
+    # Create a chief resident (base 15 shifts)
+    test_resident.level = ResidentLevel.CHIEF
+    
+    # Set up 5 PTO days
+    test_resident.time_off = [
+        TimeOff(
+            start_date=base_date,
+            end_date=base_date + timedelta(days=4),
+            is_pto=True
+        )
+    ]
+    
+    # Should reduce from 15 to 10 shifts
+    assert test_resident.get_required_shifts(base_date.month, base_date.year) == 10
