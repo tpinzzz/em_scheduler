@@ -7,6 +7,30 @@ from src.models import *
 class SchedulingConstraints:
     MAX_CONSECUTIVE_SHIFTS = 6
     SHIFT_TRANSITION_REST_HOURS = 48  # Default rest period
+
+    @staticmethod
+    def needs_supervision(resident: Resident, pod: Pod, month: int) -> bool:
+        """
+        Determines if a PGY1 resident needs supervision for the given pod.
+        
+        Rules:
+        - PGY1s need supervision in all pods July-December
+        - PGY1s need supervision in PURPLE pod January-June
+        - PGY1s can work alone in ORANGE pod January-June
+        - Other residents don't need supervision
+        """
+        if resident.level != ResidentLevel.PGY1:
+            return False
+            
+        # Residency year starts in July
+        is_first_half = month >= 7 and month <= 12
+        
+        # First half of year - need supervision everywhere
+        if is_first_half:
+            return True
+        
+        # Second half of year - only need supervision in PURPLE pod
+        return pod == Pod.PURPLE
     
     @staticmethod
     def validate_consecutive_shifts(schedule: List[Shift], resident: Resident) -> bool:
