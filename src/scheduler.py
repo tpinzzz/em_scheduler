@@ -1,5 +1,7 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from datetime import datetime, timedelta
+import calendar
+from ortools.sat.python import cp_model
 from src.models import *
 
 class SchedulingConstraints:
@@ -116,20 +118,42 @@ class Scheduler:
         self.month = month
         self.year = year
         self.constraints = SchedulingConstraints()
-        
+
+    def _setup_solver(self) -> Tuple[cp_model.CpModel, cp_model.CpSolver, Dict]:
+        """
+        Sets up the CP-SAT solver with variables and constraints for the schedule.
+        Returns the model, solver, and shift variables.
+        """
+
+        model = cp_model.CpModel()
+
+        #Get empty schedule to understand structure
+        empty_schedule = self._initialize_empty_schedule()
+
+        # Create variables: binary variable for each (resident, shift) pair
+        shifts = {}
+        for r_idx, resident in enumerate(self.residents):
+            shifts[r_idx] = {}
+            for shift in empty_schedule:
+                shift_key = (shift.date.day, shift.shift_type, shift.pod)
+                shifts[r_idx][shift_key] = model.NewBoolVar(
+                    f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
+                )
+
+
     def generate_schedule(self) -> List[Shift]:
         """
         Main scheduling algorithm using constraint satisfaction.
         Returns a list of shifts with assigned residents.
         """
-        schedule = self._initialize_empty_schedule()
+        empty_schedule = self._initialize_empty_schedule()
         
         # Use Google OR-Tools for constraint satisfaction
-        solver = self._setup_solver()
-        solution = self._solve_constraints(solver)
-        
-        if solution:
-            return self._convert_solution_to_schedule(solution)
+        model, solver, shift_vars = self._setup_solver()
+        status = solver.Solve(model) #status check
+
+        if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+            return self._convert_solution_to_schedule(solver, shift_vars, empty_schedule)
         else:
             raise ValueError("No valid schedule found satisfying all constraints")
     
