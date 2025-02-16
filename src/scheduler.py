@@ -148,7 +148,6 @@ class Scheduler:
         Sets up the CP-SAT solver with variables and constraints for the schedule.
         Returns the model, solver, and shift variables.
         """
-
         model = cp_model.CpModel()
         empty_schedule = self._initialize_empty_schedule()
 
@@ -162,26 +161,33 @@ class Scheduler:
                     f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
                 )
 
-        # Each resident must work at least half their required number of shifts
+        # Each shift must have exactly one resident
+        for shift in empty_schedule:
+            shift_key = (shift.date.day, shift.shift_type, shift.pod)
+            model.Add(sum(shifts[r_idx][shift_key] 
+                for r_idx in range(len(self.residents))) == 1)
+
+        # Each resident must work their exact required shifts
         for r_idx, resident in enumerate(self.residents):
             required_shifts = resident.get_required_shifts(self.month, self.year)
             total_shifts = sum(shifts[r_idx].values())
-            model.Add(total_shifts >= required_shifts // 2)  # Allows partial scheduling
+            model.Add(total_shifts == required_shifts)
 
-        # PGY1 Supervision: If a PGY1 is assigned, ensure there's a supervisor
-        for r_idx, resident in enumerate(self.residents):
-            if resident.level == ResidentLevel.PGY1:
-                for shift in empty_schedule:
-                    shift_key = (shift.date.day, shift.shift_type, shift.pod)
+        # PGY1 supervision constraint
+        for shift in empty_schedule:
+            shift_key = (shift.date.day, shift.shift_type, shift.pod)
+            for r_idx, resident in enumerate(self.residents):
+                if resident.level == ResidentLevel.PGY1:
                     if self.constraints.needs_supervision(resident, shift.pod, self.month):
                         supervisors = sum(
                             shifts[other_idx][shift_key]
                             for other_idx, other_resident in enumerate(self.residents)
                             if other_resident.level != ResidentLevel.PGY1
                         )
-                        model.Add(supervisors + shifts[r_idx][shift_key] >= 1)  # Ensure PGY1 has supervision
+                        # If PGY1 is assigned, there must be a supervisor
+                        model.Add(supervisors >= shifts[r_idx][shift_key])
 
-        # Each resident can only be assigned to one shift per day
+        # Each resident can only work one shift per day
         for r_idx in range(len(self.residents)):
             for day in range(1, calendar.monthrange(self.year, self.month)[1] + 1):
                 day_shifts = [
@@ -192,15 +198,14 @@ class Scheduler:
                 if day_shifts:
                     model.Add(sum(day_shifts) <= 1)
 
-        # Resident Eligibility Debugging
-        for r_idx, resident in enumerate(self.residents):
-            is_eligible = any(shift_key in shifts[r_idx] for shift_key in shifts[r_idx])
-            if not is_eligible:
-                print(f"🚨 {resident.name} is NOT being considered for any shifts!")
+        # Keep useful debugging output
+        print(f"Setting up solver with {len(self.residents)} residents")
+        for resident in self.residents:
+            required = resident.get_required_shifts(self.month, self.year)
+            print(f"Resident {resident.name} requires {required} shifts")
 
-        # Create solver
         solver = cp_model.CpSolver()
-        solver.parameters.max_time_in_seconds = 60  # Limit solve time to 1 minute
+        solver.parameters.max_time_in_seconds = 60
 
         return model, solver, shifts
 
