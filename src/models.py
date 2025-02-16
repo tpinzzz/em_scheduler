@@ -106,12 +106,12 @@ class Shift:
     date: datetime
     shift_type: ShiftType
     pod: Pod
-    resident: List[Resident] = field(default_factory=list)
+    residents: List[Resident] = field(default_factory=list)
 
     def add_resident(self, resident:Resident) -> None:
         """Add a resident to this shift."""
-        if resident not in self.resident:
-            self.resident.append(resident)
+        if resident not in self.residents:
+            self.residents.append(resident)
 
     def remove_resident(self, resident: Resident) -> None:
         """Remove a resident from this shift."""

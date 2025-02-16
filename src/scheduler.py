@@ -46,7 +46,7 @@ class SchedulingConstraints:
         """
         # Get all shifts for this resident, sorted by date
         resident_shifts = sorted(
-            [shift for shift in schedule if shift.resident == resident],
+            [shift for shift in schedule if resident in shift.residents],
             key=lambda x: x.date
         )
         
@@ -82,7 +82,7 @@ class SchedulingConstraints:
         """
         # Get all shifts for this resident, sorted by date
         resident_shifts = sorted(
-            [shift for shift in schedule if shift.resident == resident],
+            [shift for shift in schedule if resident in shift.residents],
             key=lambda x: x.date
         )
         
@@ -124,7 +124,7 @@ class SchedulingConstraints:
             bool: True if no shifts are scheduled during time off, False otherwise
         """
         # Get all shifts for this resident
-        resident_shifts = [shift for shift in schedule if shift.resident == resident]
+        resident_shifts = [shift for shift in schedule if resident in shift.residents]
         
         # Check each shift against all time off periods
         for shift in resident_shifts:
@@ -263,14 +263,13 @@ class Scheduler:
                     break  # Assign only one resident per shift
 
             if assigned_resident:
-                assigned_schedule.append(
-                    Shift(
-                        date=shift.date,
-                        shift_type=shift.shift_type,
-                        pod=shift.pod,
-                        resident=assigned_resident
-                    )
+                new_shift = Shift(
+                    date=shift.date,
+                    shift_type=shift.shift_type,
+                    pod=shift.pod
                 )
+                new_shift.add_resident(assigned_resident)
+                assigned_schedule.append(new_shift)
             else:
                 ##DEBUGGING STATEMENT BELOW REPLACED raise ValueError for now
                 #raise ValueError(f"Unstaffed shift detected: {shift.date}, {shift.shift_type}, {shift.pod}")
@@ -353,11 +352,11 @@ class Scheduler:
     
     def _validate_schedule(self, schedule: List[Shift]) -> bool:
         """Validates the complete schedule against all constraints."""
-        for resident in self.residents:
-            if not self.constraints.validate_consecutive_shifts(schedule, resident):
+        for residents in self.residents:
+            if not self.constraints.validate_consecutive_shifts(schedule, residents):
                 return False
-            if not self.constraints.validate_shift_transitions(schedule, resident):
+            if not self.constraints.validate_shift_transitions(schedule, residents):
                 return False
-            if not self.constraints.validate_time_off(schedule, resident):
+            if not self.constraints.validate_time_off(schedule, residents):
                 return False
         return True
