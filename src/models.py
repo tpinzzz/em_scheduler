@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, time
 from enum import Enum
 from typing import List, Optional, Dict
@@ -106,4 +106,34 @@ class Shift:
     date: datetime
     shift_type: ShiftType
     pod: Pod
-    resident: Optional[Resident] = None
+    resident: List[Resident] = field(default_factory=list)
+
+    def add_resident(self, resident:Resident) -> None:
+        """Add a resident to this shift."""
+        if resident not in self.resident:
+            self.resident.append(resident)
+
+    def remove_resident(self, resident: Resident) -> None:
+        """Remove a resident from this shift."""
+        if resident in self.residents:
+            self.residents.remove(resident)
+    
+    def get_resident_levels(self) -> List[ResidentLevel]:
+        """Get list of resident levels working this shift."""
+        return [resident.level for resident in self.residents]
+    
+    def has_supervision(self) -> bool:
+        """Check if shift has appropriate supervision for PGY1s."""
+        pgy1_present = ResidentLevel.PGY1 in self.get_resident_levels()
+        supervisor_present = any(
+            level in self.get_resident_levels() 
+            for level in [ResidentLevel.PGY2, ResidentLevel.PGY3, ResidentLevel.CHIEF]
+        )
+        return not pgy1_present or (pgy1_present and supervisor_present)
+    
+    def count_residents_by_level(self) -> Dict[ResidentLevel, int]:
+        """Count number of residents by training level."""
+        counts = {}
+        for resident in self.residents:
+            counts[resident.level] = counts.get(resident.level, 0) + 1
+        return counts
