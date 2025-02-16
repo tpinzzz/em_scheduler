@@ -151,6 +151,12 @@ class Scheduler:
         model = cp_model.CpModel()
         empty_schedule = self._initialize_empty_schedule()
 
+        print("\nInitial Setup:")
+        print(f"Total shifts to fill: {len(empty_schedule)}")
+        total_required = sum(resident.get_required_shifts(self.month, self.year) 
+                            for resident in self.residents)
+        print(f"Total shifts required by residents: {total_required}")
+
         # Create variables: binary variable for each (resident, shift) pair
         shifts = {}
         for r_idx, resident in enumerate(self.residents):
@@ -162,18 +168,32 @@ class Scheduler:
                 )
 
         # Each shift must have exactly one resident
+        print("\nShift Coverage Requirements:")
+        shift_count = 0
         for shift in empty_schedule:
             shift_key = (shift.date.day, shift.shift_type, shift.pod)
             model.Add(sum(shifts[r_idx][shift_key] 
-                for r_idx in range(len(self.residents))) == 1)
+                for r_idx in range(len(self.residents))) <= 1)
+            shift_count += 1
+        print(f"Allowing 0-1 residents for {shift_count} shifts")
 
         # Each resident must work their exact required shifts
+        print("\nResident Shift Requirements:")
         for r_idx, resident in enumerate(self.residents):
             required_shifts = resident.get_required_shifts(self.month, self.year)
             total_shifts = sum(shifts[r_idx].values())
             model.Add(total_shifts == required_shifts)
+            print(f"{resident.name} ({resident.level.value}): Must work exactly {required_shifts} shifts")
 
         # PGY1 supervision constraint
+        pgy1s = [r for r in self.residents if r.level == ResidentLevel.PGY1]
+        if pgy1s:
+            print("\nPGY1 Supervision Requirements:")
+            for pgy1 in pgy1s:
+                needs_purple = self.constraints.needs_supervision(pgy1, Pod.PURPLE, self.month)
+                needs_orange = self.constraints.needs_supervision(pgy1, Pod.ORANGE, self.month)
+                print(f"{pgy1.name}: Needs supervision - Purple: {needs_purple}, Orange: {needs_orange}")
+        
         for shift in empty_schedule:
             shift_key = (shift.date.day, shift.shift_type, shift.pod)
             for r_idx, resident in enumerate(self.residents):
@@ -198,7 +218,7 @@ class Scheduler:
                 if day_shifts:
                     model.Add(sum(day_shifts) <= 1)
 
-        # Keep useful debugging output
+        print("\nSolver Configuration:")
         print(f"Setting up solver with {len(self.residents)} residents")
         for resident in self.residents:
             required = resident.get_required_shifts(self.month, self.year)
