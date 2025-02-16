@@ -51,7 +51,7 @@ def save_schedule(schedule: List[Shift], filename: str):
                 "date": shift.date.isoformat(),
                 "type": shift.shift_type.value,
                 "pod": shift.pod.value,
-                "resident": shift.resident.name if shift.resident else None
+                "residents": [resident.name for resident in shift.residents] if shift.residents else []
             }
             for shift in schedule
         ]
