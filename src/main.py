@@ -66,6 +66,11 @@ def main():
     
     try:
         schedule = scheduler.generate_schedule()
+        #DEBUGGING
+        if not schedule:
+            print("❌ No schedule generated. Exiting early.")
+            return
+        ##DEBUG STATEMENT END
         save_schedule(schedule, f"schedule_{datetime.now().strftime('%Y_%m')}.json")
         print("Schedule generated successfully!")
     except ValueError as e:
