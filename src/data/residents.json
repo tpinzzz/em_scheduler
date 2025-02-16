@@ -1,0 +1,333 @@
+{
+  "residents": [
+    {
+      "id": "R1",
+      "name": "Tori Coble",
+      "level": "PGY1",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R2",
+      "name": "Cody Long",
+      "level": "PGY1",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R3",
+      "name": "TJ Meetze",
+      "level": "PGY1",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R4",
+      "name": "Thomas Sandoval",
+      "level": "PGY1",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R5",
+      "name": "Ambrose Puttman",
+      "level": "PGY1",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R6",
+      "name": "Tasanee Rungteranoont",
+      "level": "PGY1",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R7",
+      "name": "Karen Khattak",
+      "level": "PGY1",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": [
+        {
+          "start_date": "2024-07-20",
+          "end_date": "2024-07-21",
+          "is_pto": false
+        }
+      ]
+    },
+    {
+      "id": "R8",
+      "name": "Franco Sabatini",
+      "level": "PGY1",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R9",
+      "name": "Katie Hachat",
+      "level": "PGY2",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": [
+        {
+          "start_date": "2024-07-04",
+          "end_date": "2024-07-10",
+          "is_pto": true
+        }
+      ]
+    },
+    {
+      "id": "R10",
+      "name": "Ali Al Saegh",
+      "level": "PGY2",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": [
+        {
+          "start_date": "2024-07-06",
+          "end_date": "2024-07-07",
+          "is_pto": false
+        }
+      ]
+    },
+    {
+      "id": "R11",
+      "name": "Maya Pinzon",
+      "level": "PGY2",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R12",
+      "name": "Jamie Ansell",
+      "level": "PGY2",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R13",
+      "name": "Manjinder Samra",
+      "level": "PGY2",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": [
+        {
+          "start_date": "2024-07-15",
+          "end_date": "2024-07-24",
+          "is_pto": true
+        }
+      ]
+    },
+    {
+      "id": "R14",
+      "name": "Kory Jansma",
+      "level": "PGY2",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R15",
+      "name": "Jason Spinnichia",
+      "level": "PGY2",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": [
+        {
+          "start_date": "2024-07-04",
+          "end_date": "2024-07-04",
+          "is_pto": true
+        },
+        {
+          "start_date": "2024-07-12",
+          "end_date": "2024-07-12",
+          "is_pto": true
+        }
+      ]
+    },
+    {
+      "id": "R16",
+      "name": "Sarah Spelsberg",
+      "level": "PGY2",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": [
+        {
+          "start_date": "2024-07-18",
+          "end_date": "2024-07-20",
+          "is_pto": true
+        },
+        {
+          "start_date": "2024-07-05",
+          "end_date": "2024-07-06",
+          "is_pto": false
+        },
+        {
+          "start_date": "2024-07-13",
+          "end_date": "2024-07-13",
+          "is_pto": false
+        },
+        {
+          "start_date": "2024-07-25",
+          "end_date": "2024-07-25",
+          "is_pto": false
+        }
+      ]
+    },
+    {
+      "id": "R17",
+      "name": "Karen Tong",
+      "level": "PGY2",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R18",
+      "name": "Robert Knopp",
+      "level": "PGY3",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R19",
+      "name": "Austin-John Fordham",
+      "level": "PGY3",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R20",
+      "name": "Deni Hannums",
+      "level": "PGY3",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": [
+        {
+          "start_date": "2024-07-18",
+          "end_date": "2024-07-24",
+          "is_pto": true
+        },
+        {
+          "start_date": "2024-07-04",
+          "end_date": "2024-07-05",
+          "is_pto": false
+        }
+      ]
+    },
+    {
+      "id": "R21",
+      "name": "Adam Wheeler",
+      "level": "PGY3",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": [
+        {
+          "start_date": "2024-07-13",
+          "end_date": "2024-07-13",
+          "is_pto": false
+        },
+        {
+          "start_date": "2024-07-26",
+          "end_date": "2024-07-26",
+          "is_pto": false
+        }
+      ]
+    },
+    {
+      "id": "R22",
+      "name": "Kaylie Dunbar",
+      "level": "PGY3",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": []
+    },
+    {
+      "id": "R23",
+      "name": "Sean Abeln",
+      "level": "PGY3",
+      "pod_preferences": [
+        "PURPLE",
+        "ORANGE"
+      ],
+      "time_off": [
+        {
+          "start_date": "2024-07-05",
+          "end_date": "2024-07-07",
+          "is_pto": true
+        },
+        {
+          "start_date": "2024-07-10",
+          "end_date": "2024-07-10",
+          "is_pto": true
+        },
+        {
+          "start_date": "2024-07-11",
+          "end_date": "2024-07-11",
+          "is_pto": false
+        },
+        {
+          "start_date": "2024-07-15",
+          "end_date": "2024-07-15",
+          "is_pto": false
+        }
+      ]
+    }
+  ]
+}
