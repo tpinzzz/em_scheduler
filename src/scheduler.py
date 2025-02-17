@@ -143,6 +143,38 @@ class Scheduler:
         self.year = year
         self.constraints = SchedulingConstraints()
 
+    def _initialize_empty_schedule(self) -> List[Shift]:
+        """Creates empty shifts for the block based on requirements."""
+        schedule = []
+        current_date = self.block.start_date
+        
+        while current_date <= self.block.end_date:
+            for pod in Pod:
+                # Add required shifts (day and night)
+                for shift_type in [ShiftType.DAY, ShiftType.NIGHT]:
+                    # Skip Tuesday nights
+                    if shift_type == ShiftType.NIGHT and current_date.weekday() == 1:
+                        continue
+                        
+                    schedule.append(Shift(
+                        date=current_date,
+                        shift_type=shift_type,
+                        pod=pod
+                    ))
+                
+                # Add optional swing shifts
+                schedule.append(Shift(
+                    date=current_date,
+                    shift_type=ShiftType.SWING,
+                    pod=pod
+                ))
+            
+            current_date += timedelta(days=1)
+        
+        return schedule
+
+
+
     def _setup_solver(self) -> Tuple[cp_model.CpModel, cp_model.CpSolver, Dict]:
         """
         Sets up the CP-SAT solver with variables and constraints for the schedule.
@@ -152,12 +184,9 @@ class Scheduler:
         empty_schedule = self._initialize_empty_schedule()
 
         print("\nInitial Setup:")
+        print(f"Block {self.block.number}: {self.block.start_date.date()} to {self.block.end_date.date()}")
         print(f"Total shifts to fill: {len(empty_schedule)}")
-        total_required = sum(resident.get_required_shifts(self.month, self.year) 
-                            for resident in self.residents)
-        print(f"Total shifts required by residents: {total_required}")
-
-        # Create variables: binary variable for each (resident, shift) pair
+        # Create shift assignment variables
         shifts = {}
         for r_idx, resident in enumerate(self.residents):
             shifts[r_idx] = {}
@@ -167,15 +196,118 @@ class Scheduler:
                     f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
                 )
 
-        # Each shift must have exactly one resident
-        print("\nShift Coverage Requirements:")
-        shift_count = 0
+        # Add staffing requirements
         for shift in empty_schedule:
             shift_key = (shift.date.day, shift.shift_type, shift.pod)
-            model.Add(sum(shifts[r_idx][shift_key] 
-                for r_idx in range(len(self.residents))) <= 1)
-            shift_count += 1
-        print(f"Allowing 0-1 residents for {shift_count} shifts")
+            residents_for_shift = [shifts[r_idx][shift_key] for r_idx in range(len(self.residents))]
+            
+            if shift.shift_type == ShiftType.SWING:
+                # Swing shifts can have 0 or more residents
+                continue
+            else:
+                # Regular shifts need at least 1 resident
+                model.Add(sum(residents_for_shift) >= 1)
+
+        # Add after the staffing requirements in _setup_solver:
+
+        # PGY1 supervision constraints
+        for shift in empty_schedule:
+            if shift.shift_type != ShiftType.SWING:  # Only enforce for regular shifts
+                shift_key = (shift.date.day, shift.shift_type, shift.pod)
+                
+                # Get variables for PGY1s and supervisors for this shift
+                pgy1_vars = []
+                supervisor_vars = []
+                
+                for r_idx, resident in enumerate(self.residents):
+                    if shift_key not in shifts[r_idx]:
+                        continue
+                        
+                    if resident.level == ResidentLevel.PGY1:
+                        pgy1_vars.append(shifts[r_idx][shift_key])
+                    elif resident.level in [ResidentLevel.PGY2, ResidentLevel.PGY3, ResidentLevel.CHIEF]:
+                        supervisor_vars.append(shifts[r_idx][shift_key])
+                
+                # If any PGY1 is working, require at least one supervisor
+                if pgy1_vars and supervisor_vars:
+                    for pgy1_var in pgy1_vars:
+                        model.Add(sum(supervisor_vars) >= pgy1_var)
+
+        # Consecutive shift limits
+        for r_idx, resident in enumerate(self.residents):
+            # For each day in the block
+            for day in range((self.block.end_date - self.block.start_date).days + 1):
+                current_date = self.block.start_date + timedelta(days=day)
+                
+                # Look at 6-day windows
+                if day + 6 <= (self.block.end_date - self.block.start_date).days:
+                    consecutive_vars = []
+                    
+                    # Collect all shifts in the 6-day window
+                    for offset in range(6):
+                        check_date = current_date + timedelta(days=offset)
+                        for pod in Pod:
+                            for shift_type in [ShiftType.DAY, ShiftType.NIGHT]:  # Exclude swing shifts
+                                shift_key = (check_date.day, shift_type, pod)
+                                if shift_key in shifts[r_idx]:
+                                    consecutive_vars.append(shifts[r_idx][shift_key])
+                    
+                    # Ensure no more than 6 consecutive shifts
+                    if consecutive_vars:
+                        model.Add(sum(consecutive_vars) <= 6)
+
+
+        # Create variables for each resident-shift pair
+        shifts = {}
+        for r_idx, resident in enumerate(self.residents):
+            shifts[r_idx] = {}
+            for shift in empty_schedule:
+                shift_key = (shift.date.day, shift.shift_type, shift.pod)
+                
+                # Check if resident can work this shift based on rotations
+                can_work = True
+                
+                # Check block transition days
+                if shift.date == self.block.start_date:
+                    can_work = resident.can_work_transition_day(shift.date, True)
+                elif shift.date == self.block.end_date:
+                    can_work = resident.can_work_transition_day(shift.date, False)
+                
+                if can_work:
+                    shifts[r_idx][shift_key] = model.NewBoolVar(
+                        f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
+                    )
+
+        
+
+        # Add PGY1 buddy system constraint for Block 1
+        if self.block.number == 1:
+            pgy1s = [r for r in self.residents if r.level == ResidentLevel.PGY1]
+            pgy3s = [r for r in self.residents if r.level == ResidentLevel.PGY3]
+            
+            for pgy1 in pgy1s:
+                pgy1_idx = self.residents.index(pgy1)
+                
+                # For first 3 shifts of each PGY1
+                first_three_shifts = []
+                for shift in empty_schedule:
+                    shift_key = (shift.date.day, shift.shift_type, shift.pod)
+                    if shift_key in shifts[pgy1_idx]:
+                        first_three_shifts.append(shift_key)
+                        if len(first_three_shifts) == 3:
+                            break
+                
+                # Require a PGY3 to be present for these shifts
+                for shift_key in first_three_shifts:
+                    pgy3_present = []
+                    for pgy3 in pgy3s:
+                        pgy3_idx = self.residents.index(pgy3)
+                        if shift_key in shifts[pgy3_idx]:
+                            pgy3_present.append(shifts[pgy3_idx][shift_key])
+                    
+                    if pgy3_present:
+                        # If PGY1 is working, one PGY3 must be present
+                        model.Add(sum(pgy3_present) >= shifts[pgy1_idx][shift_key]) 
 
         # Each resident must work their exact required shifts
         print("\nResident Shift Requirements:")
@@ -185,27 +317,6 @@ class Scheduler:
             model.Add(total_shifts == required_shifts)
             print(f"{resident.name} ({resident.level.value}): Must work exactly {required_shifts} shifts")
 
-        # PGY1 supervision constraint
-        pgy1s = [r for r in self.residents if r.level == ResidentLevel.PGY1]
-        if pgy1s:
-            print("\nPGY1 Supervision Requirements:")
-            for pgy1 in pgy1s:
-                needs_purple = self.constraints.needs_supervision(pgy1, Pod.PURPLE, self.month)
-                needs_orange = self.constraints.needs_supervision(pgy1, Pod.ORANGE, self.month)
-                print(f"{pgy1.name}: Needs supervision - Purple: {needs_purple}, Orange: {needs_orange}")
-        
-        for shift in empty_schedule:
-            shift_key = (shift.date.day, shift.shift_type, shift.pod)
-            for r_idx, resident in enumerate(self.residents):
-                if resident.level == ResidentLevel.PGY1:
-                    if self.constraints.needs_supervision(resident, shift.pod, self.month):
-                        supervisors = sum(
-                            shifts[other_idx][shift_key]
-                            for other_idx, other_resident in enumerate(self.residents)
-                            if other_resident.level != ResidentLevel.PGY1
-                        )
-                        # If PGY1 is assigned, there must be a supervisor
-                        model.Add(supervisors >= shifts[r_idx][shift_key])
 
         # Each resident can only work one shift per day
         for r_idx in range(len(self.residents)):
@@ -330,25 +441,6 @@ class Scheduler:
         raise ValueError("No valid schedule found satisfying all constraints")
 
 
-    
-    def _initialize_empty_schedule(self) -> List[Shift]:
-        """Creates empty shifts for the month based on requirements."""
-        schedule = []
-        current_date = datetime(self.year, self.month, 1)
-        
-        while current_date.month == self.month:
-            # Skip Tuesday nights
-            if current_date.weekday() != 1:  # Tuesday is 1
-                for pod in Pod:
-                    for shift_type in ShiftType:
-                        if shift_type != ShiftType.SWING:  # Handle swing shifts separately
-                            schedule.append(Shift(current_date, shift_type, pod))
-            
-            current_date += timedelta(days=1)
-
-        print(f"Total available shifts: {len(schedule)}")
-        
-        return schedule
     
     def _validate_schedule(self, schedule: List[Shift]) -> bool:
         """Validates the complete schedule against all constraints."""
