@@ -1,6 +1,6 @@
 # Development Status & Next Steps
 
-## Current Implementation Status (as of Feb 14, 2025)
+## Current Implementation Status (as of Feb 16, 2025)
 
 ### Completed
 - ✅ Basic project structure
@@ -17,13 +17,23 @@
 - ✅ OR-Tools solver integration
 - ✅ Basic shift assignment constraints
 - ✅ PGY1 supervision rules implementation
+- ✅ Block-based scheduling (28-day blocks)
+- ✅ Support for multiple residents per shift
+- ✅ Block transition day handling
+
+### In Progress
+- 🔄 Implementing minimum staffing requirements (1 resident per regular shift)
+- 🔄 Optional swing shift implementation
+- 🔄 PGY1 buddy system for Block 1
+- 🔄 Rotation flexibility handling
 
 ### Current File Structure
 ```
 em_scheduler/
 ├── src/
-│   ├── models.py      - Data structures & enums (Updated with all resident types)
-│   ├── scheduler.py   - Core scheduling logic (now with OR-Tools implementation)
+│   ├── models.py      - Data structures & enums (Updated with Block support)
+│   ├── scheduler.py   - Core scheduling logic (Updated for multi-resident shifts)
+│   ├── rotation_loader.py - New file for handling rotation data
 │   └── main.py       - Entry point & file I/O
 ├── tests/
 │   ├── test_load.py   - Basic data loading tests
@@ -35,67 +45,56 @@ em_scheduler/
 ## Next Steps
 
 ### Priority Tasks
-1. Complete Scheduling Algorithm
-   - ✅ Implement `_setup_solver()` in Scheduler class
-   - ✅ Implement constraint satisfaction using Google OR-Tools
-   - ⬜ Implement `_convert_solution_to_schedule()` method
-   - ⬜ Test complete schedule generation
-   - ⬜ Add validation for edge cases
-   - ⬜ Add additional shift type constraints
-   - ⬜ Add fair distribution constraints
+1. Complete Scheduler Implementation
+   - ✅ Update to use blocks instead of months
+   - ✅ Add multi-resident shift support
+   - ⬜ Finalize minimum staffing implementation
+   - ⬜ Test PGY1 buddy system
+   - ⬜ Add day/night transition constraints
+   - ⬜ Implement rotation-based scheduling
 
-2. Additional Constraints to Implement
-   - ⬜ Minimum number of specific shift types (e.g., nights)
-   - ⬜ Maximum consecutive days off
-   - ⬜ Fair distribution of weekend shifts
-   - ⬜ Pod distribution rules
-   - ⬜ Special case handling for unstaffed shifts
-
-3. Testing
-   - ⬜ Add tests for schedule generation
-   - ⬜ Add tests for edge cases (PTO conflicts, etc.)
-   - ⬜ Add integration tests
-   - ⬜ Add tests for PGY1 supervision rules
-   - ⬜ Add tests for shift distribution fairness
+2. Testing
+   - ⬜ Add tests for block-based scheduling
+   - ⬜ Add tests for multi-resident shifts
+   - ⬜ Add tests for minimum staffing requirements
+   - ⬜ Add tests for PGY1 buddy system
+   - ⬜ Test schedule generation with real data
 
 ### Core Constraints Status
 ✅ Max 6 consecutive shifts
 ✅ No Tuesday nights
-✅ Shift transition rules (48h between day/night switches)
+✅ Basic shift transition rules
 ✅ PTO/RTO handling
 ✅ Basic resident assignment constraints
 ✅ PGY1 supervision rules
-⬜ Pod distribution rules
-⬜ Minimum shifts by type
-⬜ Maximum consecutive days off
-⬜ Fair weekend distribution
-⬜ Special case handling
+✅ Block transition day handling
+🔄 Minimum staffing requirements
+🔄 PGY1 buddy system for Block 1
+⬜ Day/night transition rest periods
 
-### Questions to Resolve
-- What are the minimum requirements for different shift types?
-- How many consecutive days off should be allowed?
-- How do we define "fair" for weekend shift distribution?
-- How to handle shifts that can't be staffed?
-- How to balance pod assignments for optimal distribution?
-- How to handle conflicting scheduling preferences?
+### Current Focus
+- Implementing minimum staffing requirements
+- Ensuring PGY1 supervision constraints work with multi-resident shifts
+- Testing schedule generation with current constraints
 
-## Notes
-- Currently using Google OR-Tools for constraint satisfaction
+### Notes
+- Using Google OR-Tools for constraint satisfaction
 - JSON format established for resident data
-- Basic error handling in place for data loading
 - All resident types and shift requirements updated
 - PTO/RTO rules documented in models.py
-- PGY1 supervision rules implemented in SchedulingConstraints class
+- Block system implemented (28-day blocks)
+- Multiple residents per shift supported
+- Minimum staffing requirements being implemented
 
-## Future Refactoring Considerations
-### Shift Time Calculations
-- Current shift time logic in validate_shift_transitions is complex
-- Consider adding get_start_time() and get_end_time() methods to Shift class
-- Would make time period calculations more explicit and maintainable
-- Could improve test readability
+## Immediate Next Steps
+1. Complete implementation of minimum staffing constraints
+2. Test PGY1 supervision with multi-resident shifts
+3. Implement day/night transition constraints
+4. Add tests for new functionality
+5. Generate and validate test schedules
 
-### Priority:
-- High: Complete the schedule generation implementation
-- Medium: Add additional constraint implementations
-- Medium: Expand test coverage
-- Low: Refactor time calculations
+## Questions to Resolve
+- How to best handle swing shift assignments?
+- Should we implement any maximum staffing limits?
+- How to handle shift preferences?
+- How to optimize resident distribution across shifts?
