@@ -3,6 +3,14 @@ from datetime import datetime, time
 from enum import Enum
 from typing import List, Optional, Dict
 
+class RotationType(Enum):
+    ER = "er"
+    ICU = "icu"
+    PEDS = "peds"
+    ELECTIVE = "elective"
+    OTHER = "other"
+
+
 class Pod(Enum):
     PURPLE = "purple"  # Higher acuity
     ORANGE = "orange"  # Urgent care
@@ -23,6 +31,44 @@ class ResidentLevel(Enum):
     IM_PGY1 = "im_pgy1" # Internal Medicine First Year
 
 @dataclass
+class Block:
+    number: int  # 1-13
+    start_date: datetime
+    end_date: datetime
+    
+    @classmethod
+    def get_block_dates(cls, block_number: int, academic_year: int) -> 'Block':
+        """Calculate start and end dates for a given block number."""
+        if block_number < 1 or block_number > 13:
+            raise ValueError("Block number must be between 1 and 13")
+            
+        # Block 1 starts July 1st
+        year = academic_year if block_number <= 6 else academic_year + 1
+        month = ((block_number - 1) + 6) % 12 + 1  # Start with July (7)
+        
+        if block_number == 13:
+            # Special case for Block 13 (June)
+            start_date = datetime(year, 6, 2)
+            end_date = datetime(year, 6, 30)
+        else:
+            # Regular 28-day blocks
+            if block_number == 1:
+                start_date = datetime(year, 7, 1)
+            else:
+                prev_block = cls.get_block_dates(block_number - 1, academic_year)
+                start_date = prev_block.end_date + timedelta(days=1)
+            
+            end_date = start_date + timedelta(days=27)  # 28 days total
+            
+        return cls(block_number, start_date, end_date)
+
+@dataclass
+class Rotation:
+    block_number: int
+    rotation_type: RotationType
+    is_flexible: bool
+
+@dataclass
 class TimeOff:
     start_date: datetime
     end_date: datetime
@@ -35,6 +81,50 @@ class Resident:
     level: ResidentLevel
     pod_preferences: List[Pod]
     time_off: List[TimeOff]
+    rotations: Dict[int, Rotation]  # block_number -> Rotation
+
+    def can_work_transition_day(self, date: datetime, is_block_start: bool) -> bool:
+        """Check if resident can work on a block transition day."""
+        block = self.get_block_for_date(date)
+        if not block:
+            return False
+            
+        if is_block_start:
+            prev_rotation = self.rotations.get(block.number - 1)
+            if not prev_rotation:
+                return True
+            return prev_rotation.rotation_type == RotationType.ER or prev_rotation.is_flexible
+        else:
+            next_rotation = self.rotations.get(block.number + 1)
+            if not next_rotation:
+                return True
+            return next_rotation.rotation_type == RotationType.ER or next_rotation.is_flexible
+    
+    def needs_pgy3_buddy(self, date: datetime) -> bool:
+        """Check if PGY1 needs a PGY3 buddy (first 3 shifts in Block 1)."""
+        if self.level != ResidentLevel.PGY1:
+            return False
+            
+        block = self.get_block_for_date(date)
+        if not block or block.number != 1:
+            return False
+            
+        # Count previous shifts in Block 1
+        return self.count_shifts_in_block(block) < 3
+    
+    def get_block_for_date(self, date: datetime) -> Optional[Block]:
+        """Get the block containing the given date."""
+        academic_year = date.year if date.month >= 7 else date.year - 1
+        for block_num in range(1, 14):
+            block = Block.get_block_dates(block_num, academic_year)
+            if block.start_date <= date <= block.end_date:
+                return block
+        return None
+    
+    def count_shifts_in_block(self, block: Block) -> int:
+        """Count number of shifts worked in a given block."""
+        # This will need to be implemented based on how we track assigned shifts
+        pass    
     
     def get_required_shifts(self, month: int, year: int) -> int:
         """
