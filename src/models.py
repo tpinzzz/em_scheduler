@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime, time
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import List, Optional, Dict
 
@@ -41,25 +41,18 @@ class Block:
         """Calculate start and end dates for a given block number."""
         if block_number < 1 or block_number > 13:
             raise ValueError("Block number must be between 1 and 13")
-            
-        # Block 1 starts July 1st
-        year = academic_year if block_number <= 6 else academic_year + 1
-        month = ((block_number - 1) + 6) % 12 + 1  # Start with July (7)
         
-        if block_number == 13:
-            # Special case for Block 13 (June)
-            start_date = datetime(year, 6, 2)
-            end_date = datetime(year, 6, 30)
+        if block_number == 1:
+            start_date = datetime(academic_year, 7, 1)
         else:
-            # Regular 28-day blocks
-            if block_number == 1:
-                start_date = datetime(year, 7, 1)
-            else:
-                prev_block = cls.get_block_dates(block_number - 1, academic_year)
-                start_date = prev_block.end_date + timedelta(days=1)
+            prev_block = cls.get_block_dates(block_number - 1, academic_year)
+            start_date = prev_block.end_date + timedelta(days=1)
             
-            end_date = start_date + timedelta(days=27)  # 28 days total
-            
+        if block_number == 13:
+            end_date = datetime(academic_year + 1, 6, 30)
+        else:
+            end_date = start_date + timedelta(days=27)  # 28 day blocks
+                    
         return cls(block_number, start_date, end_date)
 
 @dataclass
@@ -90,16 +83,18 @@ class Resident:
             return False
             
         if is_block_start:
+            current_rotation = self.rotations.get(block.number)
             prev_rotation = self.rotations.get(block.number - 1)
-            if not prev_rotation:
-                return True
-            return prev_rotation.rotation_type == RotationType.ER or prev_rotation.is_flexible
+            return (current_rotation and prev_rotation and 
+                    current_rotation.rotation_type == RotationType.ER and
+                    prev_rotation.rotation_type == RotationType.ER)
         else:
+            current_rotation = self.rotations.get(block.number)
             next_rotation = self.rotations.get(block.number + 1)
-            if not next_rotation:
-                return True
-            return next_rotation.rotation_type == RotationType.ER or next_rotation.is_flexible
-    
+            return (current_rotation and next_rotation and
+                    current_rotation.rotation_type == RotationType.ER and
+                    next_rotation.rotation_type == RotationType.ER)
+        
     def needs_pgy3_buddy(self, date: datetime) -> bool:
         """Check if PGY1 needs a PGY3 buddy (first 3 shifts in Block 1)."""
         if self.level != ResidentLevel.PGY1:
