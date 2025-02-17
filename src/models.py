@@ -81,7 +81,7 @@ class Resident:
     level: ResidentLevel
     pod_preferences: List[Pod]
     time_off: List[TimeOff]
-    rotations: Dict[int, Rotation]  # block_number -> Rotation
+    rotations: Dict[int, Rotation] = field(default_factory=dict)  # block_number -> Rotation
 
     def can_work_transition_day(self, date: datetime, is_block_start: bool) -> bool:
         """Check if resident can work on a block transition day."""
