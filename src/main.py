@@ -2,6 +2,7 @@ from src.models import *
 from src.scheduler import Scheduler
 import json
 from datetime import datetime
+from typing import List
 
 def load_residents() -> List[Resident]:
     """Load resident data from configuration file."""
