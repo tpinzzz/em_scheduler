@@ -137,10 +137,9 @@ class SchedulingConstraints:
         return True
 
 class Scheduler:
-    def __init__(self, residents: List[Resident], month: int, year: int):
+    def __init__(self, residents: List[Resident], block: Block):
         self.residents = residents
-        self.month = month
-        self.year = year
+        self.block = block
         self.constraints = SchedulingConstraints()
 
     def _initialize_empty_schedule(self) -> List[Shift]:
@@ -187,14 +186,27 @@ class Scheduler:
         print(f"Block {self.block.number}: {self.block.start_date.date()} to {self.block.end_date.date()}")
         print(f"Total shifts to fill: {len(empty_schedule)}")
         # Create shift assignment variables
+        # Create variables for each resident-shift pair
         shifts = {}
         for r_idx, resident in enumerate(self.residents):
             shifts[r_idx] = {}
             for shift in empty_schedule:
                 shift_key = (shift.date.day, shift.shift_type, shift.pod)
-                shifts[r_idx][shift_key] = model.NewBoolVar(
-                    f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
-                )
+                
+                # Check if resident can work this shift based on rotations
+                can_work = True
+                
+                # Check block transition days
+                if shift.date == self.block.start_date:
+                    can_work = resident.can_work_transition_day(shift.date, True)
+                elif shift.date == self.block.end_date:
+                    can_work = resident.can_work_transition_day(shift.date, False)
+                
+                if can_work:
+                    shifts[r_idx][shift_key] = model.NewBoolVar(
+                        f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
+                    )
+
 
         # Add staffing requirements
         for shift in empty_schedule:
@@ -255,29 +267,6 @@ class Scheduler:
                     # Ensure no more than 6 consecutive shifts
                     if consecutive_vars:
                         model.Add(sum(consecutive_vars) <= 6)
-
-
-        # Create variables for each resident-shift pair
-        shifts = {}
-        for r_idx, resident in enumerate(self.residents):
-            shifts[r_idx] = {}
-            for shift in empty_schedule:
-                shift_key = (shift.date.day, shift.shift_type, shift.pod)
-                
-                # Check if resident can work this shift based on rotations
-                can_work = True
-                
-                # Check block transition days
-                if shift.date == self.block.start_date:
-                    can_work = resident.can_work_transition_day(shift.date, True)
-                elif shift.date == self.block.end_date:
-                    can_work = resident.can_work_transition_day(shift.date, False)
-                
-                if can_work:
-                    shifts[r_idx][shift_key] = model.NewBoolVar(
-                        f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
-                    )
-
         
 
         # Add PGY1 buddy system constraint for Block 1
@@ -312,27 +301,36 @@ class Scheduler:
         # Each resident must work their exact required shifts
         print("\nResident Shift Requirements:")
         for r_idx, resident in enumerate(self.residents):
-            required_shifts = resident.get_required_shifts(self.month, self.year)
+            required_shifts = resident.get_required_shifts(
+                self.block.start_date.month,
+                self.block.start_date.year
+            )
             total_shifts = sum(shifts[r_idx].values())
             model.Add(total_shifts == required_shifts)
             print(f"{resident.name} ({resident.level.value}): Must work exactly {required_shifts} shifts")
 
-
         # Each resident can only work one shift per day
         for r_idx in range(len(self.residents)):
-            for day in range(1, calendar.monthrange(self.year, self.month)[1] + 1):
-                day_shifts = [
+            block_days = (self.block.end_date - self.block.start_date).days + 1
+            for day in range(block_days):
+                current_date = self.block.start_date + timedelta(days=day)
+                shifts_on_this_day = [
                     shifts[r_idx][key]
                     for key in shifts[r_idx].keys()
-                    if key[0] == day
+                    if key[0] == current_date.day  # we use current_date.day here
                 ]
-                if day_shifts:
-                    model.Add(sum(day_shifts) <= 1)
+                if shifts_on_this_day:
+                    model.Add(sum(shifts_on_this_day) <= 1)
 
         print("\nSolver Configuration:")
+        print(f"Setting up solver for Block {self.block.number}")
+        print(f"Date Range: {self.block.start_date.date()} to {self.block.end_date.date()}")
         print(f"Setting up solver with {len(self.residents)} residents")
         for resident in self.residents:
-            required = resident.get_required_shifts(self.month, self.year)
+            required = resident.get_required_shifts(
+                self.block.start_date.month,
+                self.block.start_date.year
+            )
             print(f"Resident {resident.name} requires {required} shifts")
 
         solver = cp_model.CpSolver()
@@ -407,7 +405,10 @@ class Scheduler:
             
             # Print required shifts per resident
             for resident in self.residents:
-                required_shifts = resident.get_required_shifts(self.month, self.year)
+                required_shifts = resident.get_required_shifts(
+                    self.block.start_date.month,
+                    self.block.start_date.year
+                )
                 print(f"Resident {resident.name} requires {required_shifts} shifts")
 
             return []  # Prevent crash, return empty schedule

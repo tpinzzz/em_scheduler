@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import List, Optional, Dict
 
+__all__ = ['Block', 'Resident', 'ResidentLevel', 'Pod', 'ShiftType', 'Shift']  # Add this at top
+
 class RotationType(Enum):
     ER = "er"
     ICU = "icu"
