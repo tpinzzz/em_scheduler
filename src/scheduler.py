@@ -213,8 +213,13 @@ class Scheduler:
         # Add staffing requirements
         for shift in empty_schedule:
             shift_key = (shift.date.day, shift.shift_type, shift.pod)
-            residents_for_shift = [shifts[r_idx][shift_key] for r_idx in range(len(self.residents))]
-            
+            residents_for_shift = []
+            for r_idx in range(len(self.residents)):
+                if shift_key in shifts[r_idx]:
+                    residents_for_shift.append(shifts[r_idx][shift_key])
+                else:
+                    # For debugging, let's print what's missing
+                    print(f"Debug: Missing shift_key {shift_key} for resident {self.residents[r_idx].name}")
             if shift.shift_type == ShiftType.SWING:
                 # Swing shifts can have 0 or more residents
                 continue
@@ -418,8 +423,8 @@ class Scheduler:
             schedule = self._convert_solution_to_schedule(solver, shift_vars, empty_schedule)
 
             # Calculate staffed vs. unstaffed shifts
-            num_staffed = sum(1 for shift in schedule if shift.resident)
-            num_unstaffed = sum(1 for shift in schedule if not shift.resident)
+            num_staffed = sum(1 for shift in schedule if shift.residents)
+            num_unstaffed = sum(1 for shift in schedule if not shift.residents)
 
             # Debugging: Shift statistics
             print(f"✅ Staffed Shifts: {num_staffed}")

@@ -1,11 +1,10 @@
-from src.models import Resident, TimeOff, ResidentLevel, Pod, Shift
+from src.models import Resident, TimeOff, ResidentLevel, Pod, Shift, Rotation, RotationType
 from src.scheduler import Scheduler
 import json
 from datetime import datetime
 from typing import List
 
 def load_residents() -> List[Resident]:
-    """Load resident data from configuration file."""
     try:
         with open('data/residents.json', 'r') as f:
             data = json.load(f)
@@ -31,17 +30,22 @@ def load_residents() -> List[Resident]:
                 pod_preferences=[Pod[p] for p in r['pod_preferences']],
                 time_off=time_off_list
             )
+            
+            # Add dummy ER rotations for blocks 1-13
+            for block_num in range(1, 14):
+                resident.rotations[block_num] = Rotation(
+                    block_number=block_num,
+                    rotation_type=RotationType.ER,
+                    is_flexible=True
+                )
+            
             residents.append(resident)
         
         return residents
     except FileNotFoundError:
         print("Warning: residents.json not found. Using empty resident list.")
         return []
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Error parsing residents.json: {e}")
-    except KeyError as e:
-        raise ValueError(f"Missing required field in residents.json: {e}")
-
+    
 def save_schedule(schedule: List[Shift], filename: str):
     """Save generated schedule to JSON file."""
     schedule_dict = {
