@@ -141,6 +141,8 @@ class Scheduler:
         self.residents = residents
         self.block = block
         self.constraints = SchedulingConstraints()
+        self.month = block.start_date.month
+        self.year = block.start_date.year
 
     def _initialize_empty_schedule(self) -> List[Shift]:
         """Creates empty shifts for the block based on requirements."""
@@ -345,43 +347,41 @@ class Scheduler:
         """
         assigned_schedule = []
 
-        ##DEBUGGING CODE BEGINS
+        # Debug output - update to use residents list --- Can we delete the below debugging code?
         for shift in empty_schedule:
             shift_key = (shift.date.day, shift.shift_type, shift.pod)
-            assigned_resident = None
+            assigned_residents = []
 
             for r_idx, resident in enumerate(self.residents):
-                if shift_key in shift_vars[r_idx]:  # Ensure key exists
+                if shift_key in shift_vars[r_idx]:
                     if solver.Value(shift_vars[r_idx][shift_key]) == 1:
-                        assigned_resident = resident
-                        break  # Assign only one resident per shift
+                        assigned_residents.append(resident)
 
-            if assigned_resident:
-                print(f"✅ {shift.date} - {shift.shift_type} - {shift.pod} assigned to {assigned_resident.name}")
+            if assigned_residents:
+                print(f"✅ {shift.date} - {shift.shift_type} - {shift.pod} assigned to {', '.join(r.name for r in assigned_residents)}")
             else:
                 print(f"⚠️ Unstaffed shift: {shift.date}, {shift.shift_type}, {shift.pod}")
         ##DEBUGGING CODE ENDS
 
         for shift in empty_schedule:
             shift_key = (shift.date.day, shift.shift_type, shift.pod)
-            assigned_resident = None
+            assigned_residents = []
             
             for r_idx, resident in enumerate(self.residents):
-                if solver.Value(shift_vars[r_idx][shift_key]) == 1:
-                    assigned_resident = resident
-                    break  # Assign only one resident per shift
+                if shift_key in shift_vars[r_idx]:
+                    if solver.Value(shift_vars[r_idx][shift_key]) == 1:
+                        assigned_residents.append(resident)
 
-            if assigned_resident:
+            if assigned_residents:
                 new_shift = Shift(
                     date=shift.date,
                     shift_type=shift.shift_type,
                     pod=shift.pod
                 )
-                new_shift.add_resident(assigned_resident)
+                for resident in assigned_residents:
+                    new_shift.add_resident(resident)
                 assigned_schedule.append(new_shift)
             else:
-                ##DEBUGGING STATEMENT BELOW REPLACED raise ValueError for now
-                #raise ValueError(f"Unstaffed shift detected: {shift.date}, {shift.shift_type}, {shift.pod}")
                 print(f"Unstaffed shift: {shift.date}, {shift.shift_type}, {shift.pod}")
         return assigned_schedule
 

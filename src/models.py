@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import List, Optional, Dict
 
-__all__ = ['Block', 'Resident', 'ResidentLevel', 'Pod', 'ShiftType', 'Shift']  # Add this at top
+__all__ = ['Block', 'Resident', 'ResidentLevel', 'Pod', 'ShiftType', 'Shift', 'TimeOff', 'RotationType', 'Rotation']  # Add TimeOff and others
 
 class RotationType(Enum):
     ER = "er"
@@ -82,6 +82,7 @@ class Resident:
         """Check if resident can work on a block transition day."""
         block = self.get_block_for_date(date)
         if not block:
+            print(f"Warning: No block found for date {date}")
             return False
             
         if is_block_start:
