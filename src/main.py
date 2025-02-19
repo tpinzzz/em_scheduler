@@ -1,4 +1,4 @@
-from src.models import Resident, TimeOff, ResidentLevel, Pod, Shift, Rotation, RotationType
+from src.models import Resident, TimeOff, ResidentLevel, Pod, Shift, Rotation, RotationType, Block
 from src.scheduler import Scheduler
 import json
 from datetime import datetime
@@ -67,16 +67,21 @@ def save_schedule(schedule: List[Shift], filename: str):
 
 def main():
     residents = load_residents()
-    scheduler = Scheduler(residents, datetime.now().month, datetime.now().year)
+    
+    # Create Block 1 for current academic year
+    current_year = datetime.now().year
+    academic_year = current_year if datetime.now().month >= 7 else current_year - 1
+    block = Block.get_block_dates(1, academic_year)
+    
+    # Initialize scheduler with block
+    scheduler = Scheduler(residents=residents, block=block)
     
     try:
         schedule = scheduler.generate_schedule()
-        #DEBUGGING
         if not schedule:
             print("❌ No schedule generated. Exiting early.")
             return
-        ##DEBUG STATEMENT END
-        save_schedule(schedule, f"schedule_{datetime.now().strftime('%Y_%m')}.json")
+        save_schedule(schedule, f"schedule_{block.start_date.strftime('%Y_%m')}.json")
         print("Schedule generated successfully!")
     except ValueError as e:
         print(f"Error generating schedule: {e}")

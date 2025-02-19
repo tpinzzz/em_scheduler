@@ -86,6 +86,11 @@ class Resident:
             return False
             
         if is_block_start:
+            # For block 1, we don't need to check previous block
+            if block.number == 1:
+                current_rotation = self.rotations.get(block.number)
+                return current_rotation and current_rotation.rotation_type == RotationType.ER
+            
             current_rotation = self.rotations.get(block.number)
             prev_rotation = self.rotations.get(block.number - 1)
             return (current_rotation and prev_rotation and 

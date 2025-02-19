@@ -150,11 +150,13 @@ class Scheduler:
         current_date = self.block.start_date
         
         while current_date <= self.block.end_date:
+            print(f"\nCreating shifts for {current_date.date()}")
             for pod in Pod:
                 # Add required shifts (day and night)
                 for shift_type in [ShiftType.DAY, ShiftType.NIGHT]:
                     # Skip Tuesday nights
                     if shift_type == ShiftType.NIGHT and current_date.weekday() == 1:
+                        print(f"  Skipping Tuesday night for {pod.value}")
                         continue
                         
                     schedule.append(Shift(
@@ -162,6 +164,7 @@ class Scheduler:
                         shift_type=shift_type,
                         pod=pod
                     ))
+                    print(f"  Created {shift_type.value} shift for {pod.value}")  # Added this line
                 
                 # Add optional swing shifts
                 schedule.append(Shift(
@@ -169,9 +172,11 @@ class Scheduler:
                     shift_type=ShiftType.SWING,
                     pod=pod
                 ))
+                print(f"  Created swing shift for {pod.value}")  # Added this line
             
             current_date += timedelta(days=1)
         
+        print(f"\nTotal shifts created: {len(schedule)}")  # Added this line
         return schedule
 
 
@@ -190,25 +195,32 @@ class Scheduler:
         # Create shift assignment variables
         # Create variables for each resident-shift pair
         shifts = {}
+        print("\nCreating shift variables:")
         for r_idx, resident in enumerate(self.residents):
             shifts[r_idx] = {}
+            print(f"\nChecking shifts for {resident.name}:")
             for shift in empty_schedule:
                 shift_key = (shift.date.day, shift.shift_type, shift.pod)
                 
                 # Check if resident can work this shift based on rotations
                 can_work = True
                 
-                # Check block transition days
+                # Check block transition days with debug prints
                 if shift.date == self.block.start_date:
                     can_work = resident.can_work_transition_day(shift.date, True)
+                    print(f"  Start day ({shift.date.date()}): can_work = {can_work}")
                 elif shift.date == self.block.end_date:
                     can_work = resident.can_work_transition_day(shift.date, False)
+                    print(f"  End day ({shift.date.date()}): can_work = {can_work}")
                 
                 if can_work:
                     shifts[r_idx][shift_key] = model.NewBoolVar(
                         f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
                     )
-
+                    print(f"  Created variable for {shift.date.date()} {shift.shift_type.value} {shift.pod.value}")
+                else:
+                    print(f"  SKIPPED {shift.date.date()} {shift.shift_type.value} {shift.pod.value}")
+        
 
         # Add staffing requirements
         for shift in empty_schedule:
@@ -228,7 +240,7 @@ class Scheduler:
                 model.Add(sum(residents_for_shift) >= 1)
 
         # Add after the staffing requirements in _setup_solver:
-
+        """
         # PGY1 supervision constraints
         for shift in empty_schedule:
             if shift.shift_type != ShiftType.SWING:  # Only enforce for regular shifts
@@ -304,7 +316,7 @@ class Scheduler:
                     if pgy3_present:
                         # If PGY1 is working, one PGY3 must be present
                         model.Add(sum(pgy3_present) >= shifts[pgy1_idx][shift_key]) 
-
+        """
         # Each resident must work their exact required shifts
         print("\nResident Shift Requirements:")
         for r_idx, resident in enumerate(self.residents):
