@@ -3,6 +3,16 @@ from src.scheduler import Scheduler
 import json
 from datetime import datetime
 from typing import List
+import logging
+import datetime
+
+# Set up logging at the module level, before any functions
+log_filename = f"scheduler_log_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+logging.basicConfig(
+    filename=log_filename,
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 def load_residents() -> List[Resident]:
     try:
@@ -32,6 +42,7 @@ def load_residents() -> List[Resident]:
             )
             
             # Add dummy ER rotations for blocks 1-13
+            logging.debug(f"Adding dummy ER rotations for resident {resident.name}")
             for block_num in range(1, 14):
                 resident.rotations[block_num] = Rotation(
                     block_number=block_num,
@@ -41,11 +52,12 @@ def load_residents() -> List[Resident]:
             
             residents.append(resident)
         
+        logging.info(f"Successfully loaded {len(residents)} residents")
         return residents
     except FileNotFoundError:
-        print("Warning: residents.json not found. Using empty resident list.")
+        logging.error("residents.json not found. Using empty resident list.")
         return []
-    
+
 def save_schedule(schedule: List[Shift], filename: str):
     """Save generated schedule to JSON file."""
     schedule_dict = {
@@ -64,6 +76,7 @@ def save_schedule(schedule: List[Shift], filename: str):
     
     with open(filename, 'w') as f:
         json.dump(schedule_dict, f, indent=2)
+    logging.info(f"Schedule saved to {filename}")
 
 def main():
     residents = load_residents()
@@ -73,18 +86,20 @@ def main():
     academic_year = current_year if datetime.now().month >= 7 else current_year - 1
     block = Block.get_block_dates(1, academic_year)
     
+    logging.info(f"Generating schedule for Block 1: {block.start_date.date()} to {block.end_date.date()}")
+    
     # Initialize scheduler with block
     scheduler = Scheduler(residents=residents, block=block)
     
     try:
         schedule = scheduler.generate_schedule()
         if not schedule:
-            print("❌ No schedule generated. Exiting early.")
+            logging.error("No schedule generated")
             return
         save_schedule(schedule, f"schedule_{block.start_date.strftime('%Y_%m')}.json")
-        print("Schedule generated successfully!")
+        logging.info("Schedule generated successfully!")
     except ValueError as e:
-        print(f"Error generating schedule: {e}")
+        logging.error(f"Error generating schedule: {e}")
 
 if __name__ == "__main__":
     main()
