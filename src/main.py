@@ -4,10 +4,9 @@ import json
 from datetime import datetime
 from typing import List
 import logging
-import datetime
 
 # Set up logging at the module level, before any functions
-log_filename = f"scheduler_log_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+log_filename = f"scheduler_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 logging.basicConfig(
     filename=log_filename,
     level=logging.DEBUG,
@@ -26,8 +25,8 @@ def load_residents() -> List[Resident]:
             for to in r['time_off']:
                 time_off_list.append(
                     TimeOff(
-                        start_date=datetime.fromisoformat(to['start_date']),
-                        end_date=datetime.fromisoformat(to['end_date']),
+                        start_date= datetime.strptime(to['start_date'],'%Y-%m-%d'),
+                        end_date= datetime.strptime(to['end_date'],'%Y-%m-%d'),
                         is_pto=to['is_pto']
                     )
                 )
