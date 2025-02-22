@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import calendar
 from ortools.sat.python import cp_model
 from src.models import *
+import logging
 
 class SchedulingConstraints:
     MAX_CONSECUTIVE_SHIFTS = 6
@@ -149,14 +150,16 @@ class Scheduler:
         schedule = []
         current_date = self.block.start_date
         
+        logging.info(f'Initializing empty schedule for block {self.block.number}')
+
         while current_date <= self.block.end_date:
-            print(f"\nCreating shifts for {current_date.date()}")
+            logging.info(f"\nCreating shifts for {current_date.date()}")
             for pod in Pod:
                 # Add required shifts (day and night)
                 for shift_type in [ShiftType.DAY, ShiftType.NIGHT]:
                     # Skip Tuesday nights
                     if shift_type == ShiftType.NIGHT and current_date.weekday() == 1:
-                        print(f"  Skipping Tuesday night for {pod.value}")
+                        logging.debug(f"  Skipping Tuesday night for {pod.value}")
                         continue
                         
                     schedule.append(Shift(
@@ -164,7 +167,7 @@ class Scheduler:
                         shift_type=shift_type,
                         pod=pod
                     ))
-                    print(f"  Created {shift_type.value} shift for {pod.value}")  # Added this line
+                    logging.debug(f"  Created {shift_type.value} shift for {pod.value} on {current_date.date()}")  # Added this line
                 
                 # Add optional swing shifts
                 schedule.append(Shift(
@@ -172,15 +175,15 @@ class Scheduler:
                     shift_type=ShiftType.SWING,
                     pod=pod
                 ))
-                print(f"  Created swing shift for {pod.value}")  # Added this line
+                logging.debug(f"  Created swing shift for {pod.value} on {current_date.date}")  # Added this line
             
             current_date += timedelta(days=1)
         
-        print(f"\nTotal shifts created: {len(schedule)}")  # Added this line
+        logging.info(f"\nTotal shifts created: {len(schedule)}")  # Added this line
         return schedule
 
 
-
+    
     def _setup_solver(self) -> Tuple[cp_model.CpModel, cp_model.CpSolver, Dict]:
         """
         Sets up the CP-SAT solver with variables and constraints for the schedule.
@@ -189,49 +192,49 @@ class Scheduler:
         model = cp_model.CpModel()
         empty_schedule = self._initialize_empty_schedule()
 
-        print("\nInitial Setup:")
-        print(f"Block {self.block.number}: {self.block.start_date.date()} to {self.block.end_date.date()}")
-        print(f"Total shifts to fill: {len(empty_schedule)}")
+        logging.info("Initial Setup:")
+        logging.info(f"Block {self.block.number}: {self.block.start_date.date()} to {self.block.end_date.date()}")
+        logging.info(f"Total shifts to fill: {len(empty_schedule)}")
+
         # Create shift assignment variables
-        # Create variables for each resident-shift pair
         shifts = {}
-        print("\nCreating shift variables:")
+        logging.info("Creating shift variables:")
+        
+        # First create ALL variables
         for r_idx, resident in enumerate(self.residents):
             shifts[r_idx] = {}
-            print(f"\nChecking shifts for {resident.name}:")
+            logging.info(f"Creating variables for {resident.name}:")
+            for shift in empty_schedule:
+                shift_key = (shift.date.day, shift.shift_type, shift.pod)
+                shifts[r_idx][shift_key] = model.NewBoolVar(
+                    f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
+                )
+                
+        # Then add constraints for who can't work
+        for r_idx, resident in enumerate(self.residents):
+            logging.info(f"Adding availability constraints for {resident.name}")
             for shift in empty_schedule:
                 shift_key = (shift.date.day, shift.shift_type, shift.pod)
                 
-                # Check if resident can work this shift based on rotations
+                # Check block transition days
                 can_work = True
-                
-                # Check block transition days with debug prints
                 if shift.date == self.block.start_date:
                     can_work = resident.can_work_transition_day(shift.date, True)
-                    print(f"  Start day ({shift.date.date()}): can_work = {can_work}")
+                    logging.debug(f"  Start day ({shift.date.date()}): can_work = {can_work}")
                 elif shift.date == self.block.end_date:
                     can_work = resident.can_work_transition_day(shift.date, False)
-                    print(f"  End day ({shift.date.date()}): can_work = {can_work}")
+                    logging.debug(f"  End day ({shift.date.date()}): can_work = {can_work}")
                 
-                if can_work:
-                    shifts[r_idx][shift_key] = model.NewBoolVar(
-                        f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
-                    )
-                    print(f"  Created variable for {shift.date.date()} {shift.shift_type.value} {shift.pod.value}")
-                else:
-                    print(f"  SKIPPED {shift.date.date()} {shift.shift_type.value} {shift.pod.value}")
-        
+                # If they can't work, force the variable to 0
+                if not can_work:
+                    model.Add(shifts[r_idx][shift_key] == 0)
+                    logging.debug(f"  Forcing {shift.date.date()} {shift.shift_type.value} {shift.pod.value} to 0")   
 
         # Add staffing requirements
         for shift in empty_schedule:
             shift_key = (shift.date.day, shift.shift_type, shift.pod)
-            residents_for_shift = []
-            for r_idx in range(len(self.residents)):
-                if shift_key in shifts[r_idx]:
-                    residents_for_shift.append(shifts[r_idx][shift_key])
-                else:
-                    # For debugging, let's print what's missing
-                    print(f"Debug: Missing shift_key {shift_key} for resident {self.residents[r_idx].name}")
+            residents_for_shift = [shifts[r_idx][shift_key] for r_idx in range(len(self.residents))]
+            
             if shift.shift_type == ShiftType.SWING:
                 # Swing shifts can have 0 or more residents
                 continue
@@ -364,30 +367,14 @@ class Scheduler:
         """
         assigned_schedule = []
 
-        # Debug output - update to use residents list --- Can we delete the below debugging code?
-        for shift in empty_schedule:
-            shift_key = (shift.date.day, shift.shift_type, shift.pod)
-            assigned_residents = []
-
-            for r_idx, resident in enumerate(self.residents):
-                if shift_key in shift_vars[r_idx]:
-                    if solver.Value(shift_vars[r_idx][shift_key]) == 1:
-                        assigned_residents.append(resident)
-
-            if assigned_residents:
-                print(f"✅ {shift.date} - {shift.shift_type} - {shift.pod} assigned to {', '.join(r.name for r in assigned_residents)}")
-            else:
-                print(f"⚠️ Unstaffed shift: {shift.date}, {shift.shift_type}, {shift.pod}")
-        ##DEBUGGING CODE ENDS
-
         for shift in empty_schedule:
             shift_key = (shift.date.day, shift.shift_type, shift.pod)
             assigned_residents = []
             
+            # We can iterate directly since we know all keys exist
             for r_idx, resident in enumerate(self.residents):
-                if shift_key in shift_vars[r_idx]:
-                    if solver.Value(shift_vars[r_idx][shift_key]) == 1:
-                        assigned_residents.append(resident)
+                if solver.Value(shift_vars[r_idx][shift_key]) == 1:
+                    assigned_residents.append(resident)
 
             if assigned_residents:
                 new_shift = Shift(
@@ -398,8 +385,10 @@ class Scheduler:
                 for resident in assigned_residents:
                     new_shift.add_resident(resident)
                 assigned_schedule.append(new_shift)
+                logging.info(f"✅ {shift.date} - {shift.shift_type} - {shift.pod} assigned to {', '.join(r.name for r in assigned_residents)}")
             else:
-                print(f"Unstaffed shift: {shift.date}, {shift.shift_type}, {shift.pod}")
+                logging.warning(f"⚠️ Unstaffed shift: {shift.date}, {shift.shift_type}, {shift.pod}")
+        
         return assigned_schedule
 
 
@@ -412,21 +401,20 @@ class Scheduler:
         
         # Use Google OR-Tools for constraint satisfaction
         model, solver, shift_vars = self._setup_solver()
-        status = solver.Solve(model)  # Status check
+        status = solver.Solve(model)
 
-        # Debugging: Solver status
-        print(f"Solver status: {status}")
+        logging.info(f"Solver status: {status}")
 
         if status != cp_model.OPTIMAL and status != cp_model.FEASIBLE:
-            print("❌ No feasible solution found! Debugging constraint issues...")
+            logging.error("❌ No feasible solution found! Debugging constraint issues...")
             
-            # Print required shifts per resident
+            # Log required shifts per resident
             for resident in self.residents:
                 required_shifts = resident.get_required_shifts(
                     self.block.start_date.month,
                     self.block.start_date.year
                 )
-                print(f"Resident {resident.name} requires {required_shifts} shifts")
+                logging.debug(f"Resident {resident.name} requires {required_shifts} shifts")
 
             return []  # Prevent crash, return empty schedule
 
@@ -438,27 +426,25 @@ class Scheduler:
             num_staffed = sum(1 for shift in schedule if shift.residents)
             num_unstaffed = sum(1 for shift in schedule if not shift.residents)
 
-            # Debugging: Shift statistics
-            print(f"✅ Staffed Shifts: {num_staffed}")
-            print(f"⚠️ Unstaffed Shifts: {num_unstaffed}")
+            # Log shift statistics
+            logging.info(f"✅ Staffed Shifts: {num_staffed}")
+            logging.info(f"⚠️ Unstaffed Shifts: {num_unstaffed}")
 
             # Count shifts per resident
             resident_shift_counts = {resident.name: 0 for resident in self.residents}
             for shift in schedule:
-                if shift.resident:
-                    resident_shift_counts[shift.resident.name] += 1
+                for resident in shift.residents:  # Changed from shift.resident
+                    resident_shift_counts[resident.name] += 1
 
-            print("\n📊 Resident Shift Analysis:")
+            logging.info("📊 Resident Shift Analysis:")
             for resident in self.residents:
                 required_shifts = resident.get_required_shifts(self.month, self.year)
                 assigned_shifts = resident_shift_counts.get(resident.name, 0)
-                print(f"🧑‍⚕️ {resident.name}: Required {required_shifts}, Assigned {assigned_shifts}")
+                logging.info(f"🧑‍⚕️ {resident.name}: Required {required_shifts}, Assigned {assigned_shifts}")
 
             return schedule
-        
+    
         raise ValueError("No valid schedule found satisfying all constraints")
-
-
     
     def _validate_schedule(self, schedule: List[Shift]) -> bool:
         """Validates the complete schedule against all constraints."""
