@@ -2,7 +2,7 @@ from typing import List, Dict, Tuple
 from datetime import datetime, timedelta
 import calendar
 from ortools.sat.python import cp_model
-from src.models import *
+from models import * #was 'src.models' before because that worked.. Now just 'models' works not sure what the issue is. 
 import logging
 
 class SchedulingConstraints:
@@ -242,6 +242,72 @@ class Scheduler:
                 # Regular shifts need at least 1 resident
                 model.Add(sum(residents_for_shift) >= 1)
 
+        # Day/Night transition constraints 
+        logging.info("Adding day/night transition constraints")
+        for r_idx, resident in enumerate(self.residents):
+            logging.info(f"Adding transition constraints for {resident.name}")
+            
+            # For each day in the block
+            for day in range((self.block.end_date - self.block.start_date).days):
+                current_date = self.block.start_date + timedelta(days=day)
+                
+                # For each shift type on current day
+                for current_type in ShiftType:
+                    # Check all pods for the current shift
+                    for pod in Pod:
+                        current_key = (current_date.day, current_type, pod)
+                        if current_key not in shifts[r_idx]:
+                            continue
+                        
+                        # Look ahead 5 days to check all possible transitions
+                        for future_day in range(day, min(day + 5, (self.block.end_date - self.block.start_date).days)):
+                            future_date = self.block.start_date + timedelta(days=future_day)
+                            
+                            # Check transitions to all shift types in all pods
+                            for future_type in ShiftType:
+                                if future_type != current_type:  # Only check different shift types
+                                    for future_pod in Pod:  # Check all pods for future shifts
+                                        future_key = (future_date.day, future_type, future_pod)
+                                        if future_key not in shifts[r_idx]:
+                                            continue
+                                        
+                                        # Calculate hours between shifts
+                                        shift_times = {
+                                            ShiftType.DAY: 7,    # 7am
+                                            ShiftType.NIGHT: 19, # 7pm
+                                            ShiftType.SWING: 11  # 11am
+                                        }
+                                        
+                                        current_time = datetime.combine(current_date, 
+                                            time(hour=shift_times[current_type]))
+                                        future_time = datetime.combine(future_date, 
+                                            time(hour=shift_times[future_type]))
+                                        hours_between = (future_time - current_time).total_seconds() / 3600
+                                        
+                                        # If less than 48 hours between different types of shifts, prevent assignment
+                                        if hours_between < 48:
+                                            model.Add(shifts[r_idx][current_key] + shifts[r_idx][future_key] <= 1)
+                                            
+                                        # Add stricter constraints for certain transitions
+                                        if ((current_type == ShiftType.NIGHT and future_type == ShiftType.DAY) or
+                                            (current_type == ShiftType.DAY and future_type == ShiftType.NIGHT)):
+                                            # Require at least 72 hours between day/night transitions
+                                            if hours_between < 72:
+                                                model.Add(shifts[r_idx][current_key] + shifts[r_idx][future_key] <= 1)
+
+
+        # Prevent more than one shift type change in a 72-hour period
+        for day in range((self.block.end_date - self.block.start_date).days - 3):
+            current_date = self.block.start_date + timedelta(days=day)
+            window_shifts = []
+            for d in range(3):  # Look at 3-day windows
+                for pod in Pod:
+                    for shift_type in ShiftType:
+                        key = (current_date.day + d, shift_type, pod)
+                        if key in shifts[r_idx]:
+                            window_shifts.append(shifts[r_idx][key])
+            if window_shifts:
+                model.Add(sum(window_shifts) <= 2)  # Maximum 2 shifts in any 3-day window
         # Add after the staffing requirements in _setup_solver:
         """
         # PGY1 supervision constraints
@@ -389,6 +455,21 @@ class Scheduler:
             else:
                 logging.warning(f"⚠️ Unstaffed shift: {shift.date}, {shift.shift_type}, {shift.pod}")
         
+        # Add this near the end of _convert_solution_to_schedule before returning the schedule:
+
+        # Validate day/night transitions
+        for resident in self.residents:
+            resident_shifts = sorted([s for s in assigned_schedule if resident in s.residents], 
+                                key=lambda x: x.date)
+            for i in range(len(resident_shifts)-1):
+                current = resident_shifts[i]
+                next_shift = resident_shifts[i+1]
+                if current.shift_type != next_shift.shift_type:
+                    hours_between = (next_shift.date - current.date).total_seconds() / 3600
+                    logging.info(f"Resident {resident.name}: {hours_between}h between "
+                                f"{current.shift_type.value} and {next_shift.shift_type.value} shifts")
+
+
         return assigned_schedule
 
 

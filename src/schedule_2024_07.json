@@ -1,0 +1,1403 @@
+{
+  "month": 7,
+  "year": 2024,
+  "shifts": [
+    {
+      "date": "2024-07-01T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Tori Coble",
+        "Karen Khattak",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-01T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Ambrose Puttman",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-01T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Maya Pinzon",
+        "Jamie Ansell",
+        "Sarah Spelsberg"
+      ]
+    },
+    {
+      "date": "2024-07-01T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "TJ Meetze",
+        "Robert Knopp",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-01T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Thomas Sandoval",
+        "Tasanee Rungteranoont",
+        "Jason Spinnichia"
+      ]
+    },
+    {
+      "date": "2024-07-02T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Tori Coble",
+        "TJ Meetze",
+        "Robert Knopp",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-02T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Maya Pinzon",
+        "Kory Jansma",
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-02T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-02T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Karen Khattak",
+        "Ali Al Saegh"
+      ]
+    },
+    {
+      "date": "2024-07-03T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Ali Al Saegh",
+        "Robert Knopp",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-03T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Karen Khattak",
+        "Jamie Ansell",
+        "Jason Spinnichia"
+      ]
+    },
+    {
+      "date": "2024-07-03T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Cody Long"
+      ]
+    },
+    {
+      "date": "2024-07-03T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Ambrose Puttman",
+        "Franco Sabatini"
+      ]
+    },
+    {
+      "date": "2024-07-03T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Manjinder Samra",
+        "Karen Tong",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-04T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "TJ Meetze",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-04T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Karen Khattak",
+        "Jamie Ansell",
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-04T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Cody Long"
+      ]
+    },
+    {
+      "date": "2024-07-04T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Ambrose Puttman",
+        "Maya Pinzon",
+        "Robert Knopp"
+      ]
+    },
+    {
+      "date": "2024-07-04T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Tori Coble",
+        "Manjinder Samra",
+        "Jason Spinnichia",
+        "Sarah Spelsberg",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-05T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Thomas Sandoval",
+        "Katie Hachat",
+        "Sarah Spelsberg",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-05T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Karen Khattak",
+        "Jamie Ansell",
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-05T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Maya Pinzon"
+      ]
+    },
+    {
+      "date": "2024-07-05T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "TJ Meetze",
+        "Ambrose Puttman",
+        "Franco Sabatini",
+        "Ali Al Saegh",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-05T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Cody Long",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-05T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Kory Jansma"
+      ]
+    },
+    {
+      "date": "2024-07-06T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Ambrose Puttman",
+        "Manjinder Samra",
+        "Kory Jansma"
+      ]
+    },
+    {
+      "date": "2024-07-06T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Tori Coble",
+        "TJ Meetze",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-06T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Franco Sabatini",
+        "Deni Hannums",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-06T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Thomas Sandoval",
+        "Karen Khattak",
+        "Robert Knopp"
+      ]
+    },
+    {
+      "date": "2024-07-06T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-07T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Tasanee Rungteranoont",
+        "Katie Hachat"
+      ]
+    },
+    {
+      "date": "2024-07-07T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Tori Coble",
+        "Maya Pinzon",
+        "Sarah Spelsberg",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-07T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Thomas Sandoval"
+      ]
+    },
+    {
+      "date": "2024-07-07T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "TJ Meetze",
+        "Ambrose Puttman",
+        "Franco Sabatini",
+        "Ali Al Saegh"
+      ]
+    },
+    {
+      "date": "2024-07-07T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Karen Khattak",
+        "Jamie Ansell",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-08T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Ali Al Saegh",
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-08T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Cody Long",
+        "TJ Meetze",
+        "Jamie Ansell",
+        "Sarah Spelsberg",
+        "Robert Knopp",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-08T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Franco Sabatini",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-08T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Maya Pinzon",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-08T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Tori Coble"
+      ]
+    },
+    {
+      "date": "2024-07-08T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Tasanee Rungteranoont"
+      ]
+    },
+    {
+      "date": "2024-07-09T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Ambrose Puttman",
+        "Tasanee Rungteranoont",
+        "Kory Jansma"
+      ]
+    },
+    {
+      "date": "2024-07-09T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Thomas Sandoval"
+      ]
+    },
+    {
+      "date": "2024-07-09T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "TJ Meetze",
+        "Katie Hachat",
+        "Ali Al Saegh"
+      ]
+    },
+    {
+      "date": "2024-07-09T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Jason Spinnichia",
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-10T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Karen Tong",
+        "Deni Hannums",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-10T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Ali Al Saegh"
+      ]
+    },
+    {
+      "date": "2024-07-10T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-10T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Katie Hachat",
+        "Maya Pinzon"
+      ]
+    },
+    {
+      "date": "2024-07-10T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Tori Coble",
+        "Tasanee Rungteranoont",
+        "Kory Jansma"
+      ]
+    },
+    {
+      "date": "2024-07-10T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Karen Khattak",
+        "Manjinder Samra"
+      ]
+    },
+    {
+      "date": "2024-07-11T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Maya Pinzon",
+        "Deni Hannums"
+      ]
+    },
+    {
+      "date": "2024-07-11T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "TJ Meetze",
+        "Jamie Ansell"
+      ]
+    },
+    {
+      "date": "2024-07-11T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Cody Long",
+        "Tasanee Rungteranoont",
+        "Franco Sabatini",
+        "Sarah Spelsberg",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-11T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Thomas Sandoval",
+        "Ali Al Saegh"
+      ]
+    },
+    {
+      "date": "2024-07-11T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Jason Spinnichia",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-11T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Manjinder Samra"
+      ]
+    },
+    {
+      "date": "2024-07-12T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Tori Coble",
+        "Thomas Sandoval",
+        "Kory Jansma",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-12T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Karen Khattak",
+        "Jamie Ansell",
+        "Manjinder Samra"
+      ]
+    },
+    {
+      "date": "2024-07-12T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Cody Long",
+        "Sarah Spelsberg"
+      ]
+    },
+    {
+      "date": "2024-07-12T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Tasanee Rungteranoont"
+      ]
+    },
+    {
+      "date": "2024-07-12T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Franco Sabatini"
+      ]
+    },
+    {
+      "date": "2024-07-13T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Thomas Sandoval",
+        "Kory Jansma",
+        "Robert Knopp"
+      ]
+    },
+    {
+      "date": "2024-07-13T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Deni Hannums"
+      ]
+    },
+    {
+      "date": "2024-07-13T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Ali Al Saegh",
+        "Sarah Spelsberg",
+        "Karen Tong",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-13T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Cody Long",
+        "Karen Khattak",
+        "Maya Pinzon",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-13T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Tasanee Rungteranoont",
+        "Katie Hachat",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-13T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "TJ Meetze",
+        "Franco Sabatini"
+      ]
+    },
+    {
+      "date": "2024-07-14T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Franco Sabatini"
+      ]
+    },
+    {
+      "date": "2024-07-14T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Katie Hachat",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-14T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Tori Coble",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-14T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Kory Jansma",
+        "Jason Spinnichia",
+        "Robert Knopp",
+        "Deni Hannums",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-14T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Thomas Sandoval"
+      ]
+    },
+    {
+      "date": "2024-07-14T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Jamie Ansell"
+      ]
+    },
+    {
+      "date": "2024-07-15T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Franco Sabatini",
+        "Jason Spinnichia"
+      ]
+    },
+    {
+      "date": "2024-07-15T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Thomas Sandoval",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-15T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Kory Jansma"
+      ]
+    },
+    {
+      "date": "2024-07-15T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Manjinder Samra",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-15T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Ambrose Puttman",
+        "Tasanee Rungteranoont",
+        "Karen Khattak",
+        "Sarah Spelsberg"
+      ]
+    },
+    {
+      "date": "2024-07-16T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Jamie Ansell",
+        "Manjinder Samra",
+        "Jason Spinnichia",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-16T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Ambrose Puttman",
+        "Ali Al Saegh",
+        "Maya Pinzon"
+      ]
+    },
+    {
+      "date": "2024-07-16T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Karen Tong",
+        "Robert Knopp"
+      ]
+    },
+    {
+      "date": "2024-07-16T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Tori Coble",
+        "Cody Long",
+        "Kory Jansma"
+      ]
+    },
+    {
+      "date": "2024-07-17T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Cody Long",
+        "Tasanee Rungteranoont",
+        "Manjinder Samra"
+      ]
+    },
+    {
+      "date": "2024-07-17T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Tori Coble"
+      ]
+    },
+    {
+      "date": "2024-07-17T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Ambrose Puttman"
+      ]
+    },
+    {
+      "date": "2024-07-17T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "TJ Meetze",
+        "Katie Hachat",
+        "Robert Knopp",
+        "Austin-John Fordham",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-17T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Karen Khattak",
+        "Deni Hannums"
+      ]
+    },
+    {
+      "date": "2024-07-17T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-18T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Cody Long",
+        "Robert Knopp",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-18T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Jamie Ansell"
+      ]
+    },
+    {
+      "date": "2024-07-18T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Deni Hannums"
+      ]
+    },
+    {
+      "date": "2024-07-18T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Katie Hachat"
+      ]
+    },
+    {
+      "date": "2024-07-18T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Tori Coble",
+        "Thomas Sandoval",
+        "Franco Sabatini",
+        "Kory Jansma",
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-18T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Tasanee Rungteranoont",
+        "Kaylie Dunbar",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-19T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Tasanee Rungteranoont"
+      ]
+    },
+    {
+      "date": "2024-07-19T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Ali Al Saegh",
+        "Jamie Ansell"
+      ]
+    },
+    {
+      "date": "2024-07-19T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Robert Knopp"
+      ]
+    },
+    {
+      "date": "2024-07-19T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Franco Sabatini",
+        "Jason Spinnichia",
+        "Sarah Spelsberg",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-19T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Ambrose Puttman",
+        "Maya Pinzon",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-20T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "TJ Meetze",
+        "Tasanee Rungteranoont",
+        "Katie Hachat"
+      ]
+    },
+    {
+      "date": "2024-07-20T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Jamie Ansell",
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-20T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-20T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Ali Al Saegh"
+      ]
+    },
+    {
+      "date": "2024-07-20T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Tori Coble",
+        "Franco Sabatini"
+      ]
+    },
+    {
+      "date": "2024-07-20T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Cody Long",
+        "Ambrose Puttman",
+        "Maya Pinzon",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-21T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Maya Pinzon",
+        "Jason Spinnichia"
+      ]
+    },
+    {
+      "date": "2024-07-21T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Karen Khattak",
+        "Manjinder Samra",
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-21T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Franco Sabatini"
+      ]
+    },
+    {
+      "date": "2024-07-21T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Thomas Sandoval",
+        "Kory Jansma",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-21T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "TJ Meetze"
+      ]
+    },
+    {
+      "date": "2024-07-22T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Tori Coble",
+        "TJ Meetze",
+        "Katie Hachat",
+        "Ali Al Saegh"
+      ]
+    },
+    {
+      "date": "2024-07-22T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Karen Khattak"
+      ]
+    },
+    {
+      "date": "2024-07-22T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Ambrose Puttman"
+      ]
+    },
+    {
+      "date": "2024-07-22T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Thomas Sandoval",
+        "Tasanee Rungteranoont",
+        "Kory Jansma",
+        "Jason Spinnichia",
+        "Deni Hannums"
+      ]
+    },
+    {
+      "date": "2024-07-22T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Franco Sabatini",
+        "Manjinder Samra",
+        "Sarah Spelsberg",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-22T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Cody Long",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-23T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Cody Long",
+        "Jason Spinnichia",
+        "Robert Knopp",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-23T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Ambrose Puttman"
+      ]
+    },
+    {
+      "date": "2024-07-23T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-23T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Tori Coble",
+        "Ali Al Saegh",
+        "Maya Pinzon"
+      ]
+    },
+    {
+      "date": "2024-07-24T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Thomas Sandoval",
+        "Jamie Ansell",
+        "Sarah Spelsberg"
+      ]
+    },
+    {
+      "date": "2024-07-24T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Ali Al Saegh",
+        "Maya Pinzon"
+      ]
+    },
+    {
+      "date": "2024-07-24T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Karen Tong",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-24T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "TJ Meetze",
+        "Ambrose Puttman"
+      ]
+    },
+    {
+      "date": "2024-07-24T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-25T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Thomas Sandoval",
+        "Jamie Ansell",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-25T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Maya Pinzon"
+      ]
+    },
+    {
+      "date": "2024-07-25T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Cody Long",
+        "Karen Khattak",
+        "Franco Sabatini"
+      ]
+    },
+    {
+      "date": "2024-07-25T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Tasanee Rungteranoont",
+        "Jason Spinnichia",
+        "Deni Hannums"
+      ]
+    },
+    {
+      "date": "2024-07-25T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Austin-John Fordham"
+      ]
+    },
+    {
+      "date": "2024-07-25T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Katie Hachat",
+        "Kory Jansma",
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-26T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Tori Coble"
+      ]
+    },
+    {
+      "date": "2024-07-26T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "TJ Meetze",
+        "Ali Al Saegh",
+        "Kory Jansma",
+        "Deni Hannums"
+      ]
+    },
+    {
+      "date": "2024-07-26T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Karen Khattak",
+        "Robert Knopp",
+        "Kaylie Dunbar"
+      ]
+    },
+    {
+      "date": "2024-07-26T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Thomas Sandoval",
+        "Maya Pinzon"
+      ]
+    },
+    {
+      "date": "2024-07-26T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Ambrose Puttman",
+        "Austin-John Fordham",
+        "Adam Wheeler"
+      ]
+    },
+    {
+      "date": "2024-07-26T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Cody Long"
+      ]
+    },
+    {
+      "date": "2024-07-27T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Sarah Spelsberg"
+      ]
+    },
+    {
+      "date": "2024-07-27T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Cody Long",
+        "Ambrose Puttman",
+        "Kory Jansma",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-27T00:00:00",
+      "type": "swing",
+      "pod": "purple",
+      "residents": [
+        "Franco Sabatini",
+        "Manjinder Samra",
+        "Karen Tong"
+      ]
+    },
+    {
+      "date": "2024-07-27T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "TJ Meetze",
+        "Tasanee Rungteranoont"
+      ]
+    },
+    {
+      "date": "2024-07-27T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Jason Spinnichia",
+        "Robert Knopp"
+      ]
+    },
+    {
+      "date": "2024-07-27T00:00:00",
+      "type": "swing",
+      "pod": "orange",
+      "residents": [
+        "Ali Al Saegh",
+        "Jamie Ansell"
+      ]
+    },
+    {
+      "date": "2024-07-28T00:00:00",
+      "type": "day",
+      "pod": "purple",
+      "residents": [
+        "Cody Long",
+        "Jamie Ansell",
+        "Robert Knopp",
+        "Sean Abeln"
+      ]
+    },
+    {
+      "date": "2024-07-28T00:00:00",
+      "type": "night",
+      "pod": "purple",
+      "residents": [
+        "Katie Hachat",
+        "Kory Jansma",
+        "Jason Spinnichia",
+        "Karen Tong",
+        "Deni Hannums"
+      ]
+    },
+    {
+      "date": "2024-07-28T00:00:00",
+      "type": "day",
+      "pod": "orange",
+      "residents": [
+        "Thomas Sandoval",
+        "Tasanee Rungteranoont"
+      ]
+    },
+    {
+      "date": "2024-07-28T00:00:00",
+      "type": "night",
+      "pod": "orange",
+      "residents": [
+        "Tori Coble",
+        "Karen Khattak",
+        "Sarah Spelsberg",
+        "Austin-John Fordham",
+        "Adam Wheeler",
+        "Kaylie Dunbar"
+      ]
+    }
+  ]
+}
