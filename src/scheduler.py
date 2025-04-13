@@ -230,6 +230,41 @@ class Scheduler:
                     model.Add(shifts[r_idx][shift_key] == 0)
                     logging.debug(f"  Forcing {shift.date.date()} {shift.shift_type.value} {shift.pod.value} to 0")   
 
+        # Add PTO constraints
+        logging.info("Adding PTO constraints")
+        for r_idx, resident in enumerate(self.residents):
+            # Skip residents with no time off
+            if not resident.time_off:
+                continue
+                
+            logging.info(f"Checking PTO for {resident.name}")
+            
+            # Filter for PTO only (ignore RTO)
+            pto_periods = [to for to in resident.time_off if to.is_pto]
+            
+            for pto in pto_periods:
+                start_date = pto.start_date.date()
+                end_date = pto.end_date.date()
+                
+                # For each day in their PTO period
+                current_date = start_date
+                while current_date <= end_date:
+                    # Check if this date is within our block
+                    if self.block.start_date.date() <= current_date <= self.block.end_date.date():
+                        logging.debug(f"  Adding PTO constraint for {current_date}")
+                        
+                        # For each shift on this day
+                        for pod in Pod:
+                            for shift_type in ShiftType:
+                                shift_key = (current_date.day, shift_type, pod)
+                                
+                                if shift_key in shifts[r_idx]:
+                                    # PTO is a hard constraint - resident cannot work
+                                    model.Add(shifts[r_idx][shift_key] == 0)
+                    
+                    current_date += timedelta(days=1)
+
+
         # Add staffing requirements
         for shift in empty_schedule:
             shift_key = (shift.date.day, shift.shift_type, shift.pod)
