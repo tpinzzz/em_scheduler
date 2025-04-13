@@ -296,18 +296,6 @@ class Scheduler:
                                                 model.Add(shifts[r_idx][current_key] + shifts[r_idx][future_key] <= 1)
 
 
-        # Prevent more than one shift type change in a 72-hour period
-        for day in range((self.block.end_date - self.block.start_date).days - 3):
-            current_date = self.block.start_date + timedelta(days=day)
-            window_shifts = []
-            for d in range(3):  # Look at 3-day windows
-                for pod in Pod:
-                    for shift_type in ShiftType:
-                        key = (current_date.day + d, shift_type, pod)
-                        if key in shifts[r_idx]:
-                            window_shifts.append(shifts[r_idx][key])
-            if window_shifts:
-                model.Add(sum(window_shifts) <= 2)  # Maximum 2 shifts in any 3-day window
         # Add after the staffing requirements in _setup_solver:
         """
         # PGY1 supervision constraints
