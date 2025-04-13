@@ -1,8 +1,8 @@
 from typing import List, Dict, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import calendar
 from ortools.sat.python import cp_model
-from models import * #was 'src.models' before because that worked.. Now just 'models' works not sure what the issue is. 
+from src.models import * #was 'src.models' before because that worked.. Now just 'models' works not sure what the issue is. 
 import logging
 
 class SchedulingConstraints:
@@ -427,93 +427,93 @@ class Scheduler:
         return model, solver, shifts
 
 
-def _convert_solution_to_schedule(self, solver: cp_model.CpSolver, shift_vars: Dict, empty_schedule: List[Shift]) -> List[Shift]:
-    """
-    Converts the OR-Tools solution into a list of assigned Shift objects.
-    Focuses on the most critical validations to make the chief's job easier.
-    """
-    assigned_schedule = []
-    summary = {
-        "supervision_issues": 0,
-        "time_off_conflicts": 0,
-        "resident_counts": {}
-    }
-    
-    # Initialize resident shift counts
-    for resident in self.residents:
-        summary["resident_counts"][resident.name] = 0
-    
-    # Process each shift in the empty schedule
-    for shift in empty_schedule:
-        shift_key = (shift.date.day, shift.shift_type, shift.pod)
-        assigned_residents = []
+    def _convert_solution_to_schedule(self, solver: cp_model.CpSolver, shift_vars: Dict, empty_schedule: List[Shift]) -> List[Shift]:
+        """
+        Converts the OR-Tools solution into a list of assigned Shift objects.
+        Focuses on the most critical validations to make the chief's job easier.
+        """
+        assigned_schedule = []
+        summary = {
+            "supervision_issues": 0,
+            "time_off_conflicts": 0,
+            "resident_counts": {}
+        }
         
-        # Find which residents are assigned to this shift
-        for r_idx, resident in enumerate(self.residents):
-            if shift_key in shift_vars[r_idx] and solver.Value(shift_vars[r_idx][shift_key]) == 1:
-                assigned_residents.append(resident)
-                summary["resident_counts"][resident.name] += 1
+        # Initialize resident shift counts
+        for resident in self.residents:
+            summary["resident_counts"][resident.name] = 0
         
-        # Create the shift with assigned residents
-        new_shift = Shift(
-            date=shift.date,
-            shift_type=shift.shift_type,
-            pod=shift.pod
-        )
-        
-        for resident in assigned_residents:
-            new_shift.add_resident(resident)
-        
-        # Check PGY1 supervision
-        pgy1_present = any(r.level == ResidentLevel.PGY1 for r in assigned_residents)
-        supervisor_present = any(r.level in [ResidentLevel.PGY2, ResidentLevel.PGY3, ResidentLevel.CHIEF] 
-                                for r in assigned_residents)
-        
-        if pgy1_present and not supervisor_present and shift.shift_type != ShiftType.SWING:
-            summary["supervision_issues"] += 1
-            logging.warning(f"⚠️ Supervision issue: {shift.date.date()} {shift.shift_type.value} {shift.pod.value}")
-        
-        # Add to schedule (include even if unstaffed for completeness)
-        assigned_schedule.append(new_shift)
-        
-        if assigned_residents:
-            logging.info(f"✅ {shift.date.date()} {shift.shift_type.value} {shift.pod.value}: {', '.join(r.name for r in assigned_residents)}")
-        elif shift.shift_type != ShiftType.SWING:  # Only warn about unstaffed required shifts
-            logging.warning(f"⚠️ Unstaffed: {shift.date.date()} {shift.shift_type.value} {shift.pod.value}")
-    
-    # Check time-off conflicts
-    for resident in self.residents:
-        if not resident.time_off:
-            continue
+        # Process each shift in the empty schedule
+        for shift in empty_schedule:
+            shift_key = (shift.date.day, shift.shift_type, shift.pod)
+            assigned_residents = []
             
-        resident_shifts = [s for s in assigned_schedule if resident in s.residents]
-        for time_off in resident.time_off:
-            for shift in resident_shifts:
-                if time_off.start_date.date() <= shift.date.date() <= time_off.end_date.date():
-                    summary["time_off_conflicts"] += 1
-                    logging.warning(f"⚠️ Time off conflict: {resident.name} on {shift.date.date()} {shift.shift_type.value}")
-    
-    # Print quick summary
-    logging.info("\nSchedule Summary:")
-    logging.info(f"Total shifts created: {len(assigned_schedule)}")
-    
-    staffed_shifts = sum(1 for s in assigned_schedule if s.residents)
-    logging.info(f"Shifts with residents: {staffed_shifts}")
-    
-    if summary["supervision_issues"] > 0:
-        logging.info(f"⚠️ PGY1 supervision issues: {summary['supervision_issues']}")
-    
-    if summary["time_off_conflicts"] > 0:
-        logging.info(f"⚠️ Time off conflicts: {summary['time_off_conflicts']}")
-    
-    logging.info("\nResident Shift Counts:")
-    for resident in self.residents:
-        required = resident.get_required_shifts(self.month, self.year)
-        assigned = summary["resident_counts"][resident.name]
-        match_status = "✅" if assigned == required else "⚠️"
-        logging.info(f"{match_status} {resident.name} ({resident.level.value}): {assigned}/{required}")
-    
-    return assigned_schedule
+            # Find which residents are assigned to this shift
+            for r_idx, resident in enumerate(self.residents):
+                if shift_key in shift_vars[r_idx] and solver.Value(shift_vars[r_idx][shift_key]) == 1:
+                    assigned_residents.append(resident)
+                    summary["resident_counts"][resident.name] += 1
+            
+            # Create the shift with assigned residents
+            new_shift = Shift(
+                date=shift.date,
+                shift_type=shift.shift_type,
+                pod=shift.pod
+            )
+            
+            for resident in assigned_residents:
+                new_shift.add_resident(resident)
+            
+            # Check PGY1 supervision
+            pgy1_present = any(r.level == ResidentLevel.PGY1 for r in assigned_residents)
+            supervisor_present = any(r.level in [ResidentLevel.PGY2, ResidentLevel.PGY3, ResidentLevel.CHIEF] 
+                                    for r in assigned_residents)
+            
+            if pgy1_present and not supervisor_present and shift.shift_type != ShiftType.SWING:
+                summary["supervision_issues"] += 1
+                logging.warning(f"⚠️ Supervision issue: {shift.date.date()} {shift.shift_type.value} {shift.pod.value}")
+            
+            # Add to schedule (include even if unstaffed for completeness)
+            assigned_schedule.append(new_shift)
+            
+            if assigned_residents:
+                logging.info(f"✅ {shift.date.date()} {shift.shift_type.value} {shift.pod.value}: {', '.join(r.name for r in assigned_residents)}")
+            elif shift.shift_type != ShiftType.SWING:  # Only warn about unstaffed required shifts
+                logging.warning(f"⚠️ Unstaffed: {shift.date.date()} {shift.shift_type.value} {shift.pod.value}")
+        
+        # Check time-off conflicts
+        for resident in self.residents:
+            if not resident.time_off:
+                continue
+                
+            resident_shifts = [s for s in assigned_schedule if resident in s.residents]
+            for time_off in resident.time_off:
+                for shift in resident_shifts:
+                    if time_off.start_date.date() <= shift.date.date() <= time_off.end_date.date():
+                        summary["time_off_conflicts"] += 1
+                        logging.warning(f"⚠️ Time off conflict: {resident.name} on {shift.date.date()} {shift.shift_type.value}")
+        
+        # Print quick summary
+        logging.info("\nSchedule Summary:")
+        logging.info(f"Total shifts created: {len(assigned_schedule)}")
+        
+        staffed_shifts = sum(1 for s in assigned_schedule if s.residents)
+        logging.info(f"Shifts with residents: {staffed_shifts}")
+        
+        if summary["supervision_issues"] > 0:
+            logging.info(f"⚠️ PGY1 supervision issues: {summary['supervision_issues']}")
+        
+        if summary["time_off_conflicts"] > 0:
+            logging.info(f"⚠️ Time off conflicts: {summary['time_off_conflicts']}")
+        
+        logging.info("\nResident Shift Counts:")
+        for resident in self.residents:
+            required = resident.get_required_shifts(self.month, self.year)
+            assigned = summary["resident_counts"][resident.name]
+            match_status = "✅" if assigned == required else "⚠️"
+            logging.info(f"{match_status} {resident.name} ({resident.level.value}): {assigned}/{required}")
+        
+        return assigned_schedule
 
 
     def generate_schedule(self) -> List[Shift]:
