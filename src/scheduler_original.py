@@ -2,16 +2,8 @@ from typing import List, Dict, Tuple
 from datetime import datetime, timedelta, time
 import calendar
 from ortools.sat.python import cp_model
-try:
-    from src.models import *
-    from src.validators import SchedulingValidator # type: ignore
-    from .constraints import SchedulingConstraints as SchedulingConstraintsNew # type: ignore #Rename to avoid conflict
-except ImportError:
-    from models import *
-    from validators import SchedulingValidator # type: ignore
-    from constraints import SchedulingConstraints as SchedulingConstraintsNew # type: ignore #Rename to avoid conflict
+from src.models import * #was 'src.models' before because that worked.. Now just 'models' works not sure what the issue is. 
 import logging
-
 
 class SchedulingConstraints:
     MAX_CONSECUTIVE_SHIFTS = 6
@@ -217,19 +209,7 @@ class Scheduler:
                 shifts[r_idx][shift_key] = model.NewBoolVar(
                     f'shift_r{r_idx}_d{shift.date.day}_t{shift.shift_type.value}_p{shift.pod.value}'
                 )
-
-        # In the _setup_solver method, after creating variables but before returning
-        # Add this right after staffing requirements:
-        # Add buddy system constraints
-        # In _setup_solver method
-        SchedulingConstraintsNew.add_buddy_constraints(
-            model, shifts, self.residents, empty_schedule, self.block.number
-        )
-
-        SchedulingConstraintsNew.add_side_allocation_constraints(
-            model, shifts, self.residents, empty_schedule, self.block.number
-        )
-
+                
         # Then add constraints for who can't work
         for r_idx, resident in enumerate(self.residents):
             logging.info(f"Adding availability constraints for {resident.name}")
@@ -465,7 +445,7 @@ class Scheduler:
             print(f"Resident {resident.name} requires {required} shifts")
 
         solver = cp_model.CpSolver()
-        solver.parameters.max_time_in_seconds = 180
+        solver.parameters.max_time_in_seconds = 60
 
         return model, solver, shifts
 

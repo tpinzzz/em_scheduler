@@ -53,3 +53,8 @@ Thumbs.db
 # Project specific
 data/schedules/*
 !data/schedules/.gitkeep
+
+# Generated schedule files
+schedule_block1_*.json
+*.numbers
+archive/

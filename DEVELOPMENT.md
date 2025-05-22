@@ -1,110 +1,143 @@
 # Development Status & Next Steps
 
-## Current Implementation Status (as of April 15, 2025)
+## Current Implementation Status (as of May 22, 2025)
 
-### Completed
-- ✅ Basic project structure
-- ✅ Data models (Resident, Shift, TimeOff)
-- ✅ Sample data loading (residents.json)
-- ✅ Initial scheduler class structure
-- ✅ Basic constraints defined
-- ✅ Consecutive shifts validation (max 6 in a row)
-- ✅ No Tuesday nights (in _initialize_empty_schedule)
-- ✅ Shift transition rules (48h rest between day/night switches)
-- ✅ PTO/RTO time blocking as hard constraints
-- ✅ Updated resident types and shift requirements
-- ✅ Added documentation to get_required_shifts
-- ✅ OR-Tools solver integration
-- ✅ Basic shift assignment constraints
-- ✅ Block-based scheduling (28-day blocks)
-- ✅ Support for multiple residents per shift
-- ✅ Block transition day handling
-- ✅ Improved logging system
-- ✅ Day/night transition rest periods (upgraded to 72h for certain transitions)
+### ✅ Completed & Working
+- Basic project structure
+- Data models (Resident, Shift, TimeOff, Block)
+- Sample data loading (residents.json)
+- OR-Tools solver integration
+- Block-based scheduling (28-day blocks)
+- Support for multiple residents per shift
+- Block transition day handling
+- Improved logging system
+- PTO/RTO time blocking as hard constraints
+- Day/night transition rest periods (48-72h between different shift types)
+- Basic shift assignment constraints
+- Required shift counts per resident (with PTO reduction logic)
+- One shift per resident per day constraint
+- Basic staffing requirements (at least 1 resident per regular shift)
+- No Tuesday nights rule
 
-### In Progress
-- 🔄 Re-enabling PGY1 supervision constraints
-- 🔄 Implementing minimum staffing requirements (specific staffing levels by pod/shift)
-- 🔄 PGY1 buddy system for Block 1
-- 🔄 Rotation flexibility handling
-- 🔄 Refactoring date handling from .days to actual dates to handle cross-month blocks correctly
+### 🔄 Partially Complete (Refactoring in Progress)
+- **File separation partially done**:
+  - ✅ `src/models.py` - Clean data models
+  - ✅ `src/constraints.py` - Basic constraint framework (buddy system, side allocation)
+  - ✅ `src/validators.py` - Post-scheduling validation logic
+  - ❌ `src/scheduler.py` - Still contains mixed responsibilities (400+ lines)
+
+### 🚨 Known Issues & Disabled Features
+- **Duplicate constraint classes**: Two `SchedulingConstraints` classes exist (constraints.py vs scheduler.py)
+- **Critical constraints disabled** (commented out in scheduler.py):
+  - PGY1 supervision requirements
+  - Consecutive shifts validation (max 6 in a row)
+  - PGY1 buddy system for Block 1
+- **Mixed responsibilities**: scheduler.py handles both scheduling logic AND constraint definitions
+- **Inconsistent imports**: Some files use relative imports, others don't
+
+### ❌ Not Implemented
+- Minimum staffing requirements (specific staffing levels by pod/shift)
+- Rotation flexibility handling
+- Shift preferences
+- Maximum staffing limits
+- Resident distribution optimization across shifts
 
 ### Current File Structure
 ```
 em_scheduler/
 ├── src/
-│   ├── models.py      - Data structures & enums (Updated with Block support)
-│   ├── scheduler.py   - Core scheduling logic (Updated for multi-resident shifts, PTO constraints)
-│   ├── rotation_loader.py - New file for handling rotation data
-│   └── main.py       - Entry point & file I/O (enhanced logging)
-├── tests/
-│   ├── test_load.py   - Basic data loading tests
-│   ├── test_multi_resident_scheduling.py - Tests for multi-resident shifts
-│   ├── test_block.py - Tests for block-based scheduling
-│   ├── test_shift_assignment.py - Tests for shift assignments
-│   └── test_constraints.py - Constraint validation tests
+│   ├── models.py           ✅ Clean data structures & enums
+│   ├── scheduler.py        🚨 Mixed responsibilities (needs refactoring)
+│   ├── constraints.py      🔄 Partial constraint framework
+│   ├── validators.py       ✅ Post-scheduling validation
+│   ├── main.py            ✅ Entry point & file I/O
+│   └── data/
+│       └── residents.json  ✅ Sample resident data
+├── tests/                  ✅ Comprehensive test suite
 └── data/
-    └── residents.json - Sample resident data
+    └── residents.json      ✅ Sample resident data
 ```
 
-## Next Steps
+## Immediate Priority Tasks
 
-### Priority Tasks
-1. Complete Scheduler Implementation
-   - ✅ Update to use blocks instead of months
-   - ✅ Add multi-resident shift support
-   - ✅ Implement PTO as hard constraints
-   - ✅ Fix consecutive shifts logic
-   - ✅ Improve day/night transition constraints
-   - ⬜ Re-enable and test PGY1 supervision constraints
-   - ⬜ Finalize minimum staffing implementation
-   - ⬜ Implement PGY1 buddy system
-   - ⬜ Implement rotation-based scheduling
+### 1. Complete Refactoring (HIGH PRIORITY)
+- **Consolidate constraint classes**: Merge duplicate `SchedulingConstraints` classes
+- **Extract constraints from scheduler.py**: Move all constraint logic to `constraints.py`
+- **Clean up scheduler.py**: Focus only on scheduling algorithm and solver setup
+- **Fix import inconsistencies**: Standardize import patterns across files
 
-2. Testing
-   - ✅ Add tests for block-based scheduling
-   - ✅ Add tests for multi-resident shifts
-   - ⬜ Add tests for minimum staffing requirements
-   - ⬜ Add tests for PGY1 buddy system
-   - ⬜ Test schedule generation with real data
+### 2. Re-enable Critical Constraints (HIGH PRIORITY)
+- Re-enable PGY1 supervision constraints (currently commented out)
+- Re-enable consecutive shift limits (max 6 consecutive shifts)
+- Re-enable PGY1 buddy system for Block 1
+- Test all re-enabled constraints
 
-### Core Constraints Status
-✅ Max 6 consecutive shifts
-✅ No Tuesday nights
-✅ Basic shift transition rules (48-72h rest between different shift types)
-✅ PTO/RTO handling as hard constraints
-✅ Block transition day handling
-🔄 PGY1 supervision rules
-🔄 Minimum staffing requirements
-🔄 PGY1 buddy system for Block 1
-✅ Day/night transition rest periods
+### 3. Implement Missing Features (MEDIUM PRIORITY)
+- Minimum staffing requirements (specific levels by pod/shift)
+- Advanced PGY1 buddy system implementation
+- Rotation-based scheduling constraints
 
-### Current Focus
-- Re-enabling PGY1 supervision constraints
-- Implementing minimum staffing requirements based on pod and shift type
-- Ensuring PGY1 buddy system works for Block 1
-- Testing generated schedules with real resident data
+## Constraint Implementation Status
 
-### Notes
-- Using Google OR-Tools for constraint satisfaction
-- JSON format established for resident data
-- All resident types and shift requirements updated
-- PTO/RTO rules implemented as hard constraints
-- Block system implemented (28-day blocks)
-- Multiple residents per shift supported
-- Improved logging throughout the scheduler
-- Generated test schedule for Block 1 of 2024
+### Active Constraints ✅
+- PTO/RTO blocking (hard constraints)
+- Day/night transition rest periods (48-72h)
+- Block transition day availability
+- Required shift counts per resident
+- One shift per resident per day
+- Basic staffing (≥1 resident per regular shift)
+- No Tuesday nights
 
-## Immediate Next Steps
-1. Refactor date handling throughout the codebase to use actual dates instead of .days to correctly handle cross-month blocks
-2. Re-enable and test PGY1 supervision constraints
-3. Implement PGY1 buddy system for Block 1
-4. Define and implement specific staffing requirements by pod/shift
-5. Add comprehensive tests for all constraints
-6. Generate and validate test schedules with full resident roster
+### Disabled Constraints 🚨
+- PGY1 supervision rules (commented out)
+- Consecutive shift limits (commented out)
+- PGY1 buddy system for Block 1 (commented out)
+- Advanced minimum staffing requirements
+
+### Validation-Only Features ✅
+- Buddy system validation (Block 1 swing shifts = PGY2 only)
+- Side allocation validation (max 4 residents/side in Block 1, 3 in others)
+
+## Next Steps Roadmap
+
+### Phase 1: Refactoring Cleanup
+1. Consolidate `SchedulingConstraints` classes
+2. Move all constraint logic out of `scheduler.py`
+3. Standardize imports across all files
+4. Update tests to use new structure
+
+### Phase 2: Re-enable Core Constraints
+1. Re-enable PGY1 supervision constraints
+2. Re-enable consecutive shift limits
+3. Re-enable PGY1 buddy system
+4. Comprehensive testing of all constraints
+
+### Phase 3: Feature Implementation
+1. Implement advanced minimum staffing requirements
+2. Add rotation-based scheduling
+3. Implement shift preferences
+4. Add resident distribution optimization
+
+## Testing Status
+- ✅ Basic data loading tests
+- ✅ Block-based scheduling tests
+- ✅ Multi-resident shift tests
+- ✅ Constraint validation tests
+- ⬜ Integration tests for re-enabled constraints
+- ⬜ Performance tests with full resident roster
+
+## Current Focus
+**IMMEDIATE**: Complete the refactoring that was started to separate concerns properly. The scheduler is currently in a hybrid state with constraints scattered across multiple files and some critical features disabled.
 
 ## Questions to Resolve
-- How to best handle swing shift assignments?
-- Should we implement any maximum staffing limits?
-- How to handle shift preferences?
-- How to optimize resident distribution across shifts?
+- How to handle swing shift assignments optimally?
+- Should we implement maximum staffing limits per shift?
+- How to prioritize resident preferences vs constraint satisfaction?
+- Performance optimization for larger resident rosters?
+
+## Notes
+- Using Google OR-Tools for constraint satisfaction
+- JSON format established for resident data
+- Block system implemented (28-day blocks starting July 1)
+- Generated test schedule for Block 1 of 2024
+- Logging system in place for debugging

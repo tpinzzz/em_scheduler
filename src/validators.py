@@ -1,13 +1,24 @@
 from typing import List, Dict, Tuple
 from datetime import datetime, timedelta
-from models import *  # Direct import since file is now at same level
+# Try package-level import first, then local import
+try:
+    from src.models import *
+except ImportError:
+    from models import *
 
 class SchedulingValidator:
+    """
+    Validates completed schedules against rules that may not be 
+    directly encoded in the constraint solver.
+    """
+    
+
     @staticmethod
     def validate_buddy_system(shift: Shift, block_number: int) -> bool:
         """
         Validates the buddy system requirements for Block 1:
-        - PGY1 residents must be paired with PGY3 residents
+        - PGY1 residents must be paired with an equal number of PGY3 residents
+        - Maximum 4 residents per side
         - Swing shifts should only be filled by PGY2 residents
         
         Returns True if requirements are met, False otherwise.
@@ -25,13 +36,17 @@ class SchedulingValidator:
                 return True
             # If filled, must be only PGY2
             return all(resident.level == ResidentLevel.PGY2 for resident in residents)
-            
-        # For regular shifts, check PGY1-PGY3 pairing
-        has_pgy1 = any(r.level == ResidentLevel.PGY1 for r in residents)
-        has_pgy3 = any(r.level == ResidentLevel.PGY3 for r in residents)
         
-        # If there's a PGY1, there must be a PGY3
-        if has_pgy1 and not has_pgy3:
+        # Maximum 4 residents per side
+        if len(residents) > 4:
+            return False
+            
+        # For regular shifts, check PGY1-PGY3 pairing ratio
+        pgy1_count = sum(1 for r in residents if r.level == ResidentLevel.PGY1)
+        pgy3_count = sum(1 for r in residents if r.level == ResidentLevel.PGY3)
+        
+        # Must have equal numbers of PGY1s and PGY3s
+        if pgy1_count > 0 and pgy1_count != pgy3_count:
             return False
             
         return True
