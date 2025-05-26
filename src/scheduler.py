@@ -13,7 +13,7 @@ except ImportError:
 import logging
 
 
-class SchedulingConstraints:
+class SchedulingValidators:
     MAX_CONSECUTIVE_SHIFTS = 6
     SHIFT_TRANSITION_REST_HOURS = 48  # Default rest period
 
@@ -149,7 +149,7 @@ class Scheduler:
     def __init__(self, residents: List[Resident], block: Block):
         self.residents = residents
         self.block = block
-        self.constraints = SchedulingConstraints()
+        self.constraints = SchedulingValidators()
         self.month = block.start_date.month
         self.year = block.start_date.year
 
