@@ -108,3 +108,29 @@ class SchedulingConstraints:
                 
                 if resident_count_vars:
                     model.Add(sum(resident_count_vars) <= 1)
+
+
+    
+    @staticmethod
+    def add_pto_constraints(model: cp_model.CpModel, shifts: Dict,
+                        residents: List[Resident], block: Block):
+        """Adds PTO blocking constraints to the model."""
+        for r_idx, resident in enumerate(residents):
+            if not resident.time_off:
+                continue
+                
+            pto_periods = [to for to in resident.time_off if to.is_pto]
+            
+            for pto in pto_periods:
+                start_date = pto.start_date.date()
+                end_date = pto.end_date.date()
+                
+                current_date = start_date
+                while current_date <= end_date:
+                    if block.start_date.date() <= current_date <= block.end_date.date():
+                        for pod in Pod:
+                            for shift_type in ShiftType:
+                                shift_key = (current_date.day, shift_type, pod)
+                                if shift_key in shifts[r_idx]:
+                                    model.Add(shifts[r_idx][shift_key] == 0)
+                    current_date += timedelta(days=1)
