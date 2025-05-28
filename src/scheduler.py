@@ -230,25 +230,10 @@ class Scheduler:
             model, shifts, self.residents, empty_schedule, self.block.number
         )
 
-        # Then add constraints for who can't work
-        for r_idx, resident in enumerate(self.residents):
-            logging.info(f"Adding availability constraints for {resident.name}")
-            for shift in empty_schedule:
-                shift_key = (shift.date.day, shift.shift_type, shift.pod)
-                
-                # Check block transition days
-                can_work = True
-                if shift.date == self.block.start_date:
-                    can_work = resident.can_work_transition_day(shift.date, True)
-                    logging.debug(f"  Start day ({shift.date.date()}): can_work = {can_work}")
-                elif shift.date == self.block.end_date:
-                    can_work = resident.can_work_transition_day(shift.date, False)
-                    logging.debug(f"  End day ({shift.date.date()}): can_work = {can_work}")
-                
-                # If they can't work, force the variable to 0
-                if not can_work:
-                    model.Add(shifts[r_idx][shift_key] == 0)
-                    logging.debug(f"  Forcing {shift.date.date()} {shift.shift_type.value} {shift.pod.value} to 0")   
+        SchedulingConstraintsNew.add_block_transition_constraints(
+        model, shifts, self.residents, empty_schedule, self.block
+        )
+
         
         #PTO Constaints
         SchedulingConstraintsNew.add_pto_constraints(model, shifts, self.residents, self.block)

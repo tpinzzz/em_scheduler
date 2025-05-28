@@ -14,6 +14,42 @@ class SchedulingConstraints:
     Adds constraints to the CP-SAT model during initialization.
     These are enforced during the solving process.
     """
+
+    @staticmethod
+    def add_block_transition_constraints(model, shifts, residents, empty_schedule, block):
+        """
+        Adds constraints to prevent residents from being scheduled on block transition days
+        if they are unavailable.
+
+        Specifically:
+        - On the first day of a block, checks if the resident can work using their
+        `can_work_transition_day` method with `is_start=True`.
+        - On the last day of a block, checks similarly with `is_start=False`.
+        - If the resident cannot work on that day, adds a hard constraint to ensure
+        they are not scheduled for any shifts on that date.
+
+        Args:
+        model (cp_model.CpModel): The constraint programming model.
+        shifts (Dict[int, Dict[Tuple[int, ShiftType, Pod], cp_model.BoolVar]]): 
+            Mapping of resident index to their possible shift assignments.
+        residents (List[Resident]): The list of resident objects.
+        empty_schedule (List[Shift]): The list of all unassigned shifts in the block.
+        block (Block): The block object, containing start and end dates.
+        """
+        for r_idx, resident in enumerate(residents):
+            logging.info(f"Adding transition-day constraints for {resident.name}")
+            for shift in empty_schedule:
+                shift_key = (shift.date.day, shift.shift_type, shift.pod)
+
+                can_work = True
+                if shift.date == block.start_date:
+                    can_work = resident.can_work_transition_day(shift.date, True)
+                elif shift.date == block.end_date:
+                    can_work = resident.can_work_transition_day(shift.date, False)
+
+                if not can_work:
+                    model.Add(shifts[r_idx][shift_key] == 0)
+
     
     @staticmethod
     def add_buddy_constraints(model: cp_model.CpModel, shifts: Dict, 
