@@ -5,11 +5,11 @@ from ortools.sat.python import cp_model
 try:
     from src.models import *
     from src.validators import SchedulingValidator # type: ignore
-    from .constraints import SchedulingConstraints as SchedulingConstraintsNew # type: ignore #Rename to avoid conflict
+    from .constraints import SchedulingConstraints as SchedulingConstraints # type: ignore #Rename to avoid conflict
 except ImportError:
     from models import *
     from validators import SchedulingValidator # type: ignore
-    from constraints import SchedulingConstraints as SchedulingConstraintsNew # type: ignore #Rename to avoid conflict
+    from constraints import SchedulingConstraints as SchedulingConstraints # type: ignore #Rename to avoid conflict
 import logging
 
 
@@ -222,21 +222,21 @@ class Scheduler:
         # Add this right after staffing requirements:
         # Add buddy system constraints
         # In _setup_solver method
-        SchedulingConstraintsNew.add_buddy_constraints(
+        SchedulingConstraints.add_buddy_constraints(
             model, shifts, self.residents, empty_schedule, self.block.number
         )
 
-        SchedulingConstraintsNew.add_side_allocation_constraints(
+        SchedulingConstraints.add_side_allocation_constraints(
             model, shifts, self.residents, empty_schedule, self.block.number
         )
 
-        SchedulingConstraintsNew.add_block_transition_constraints(
+        SchedulingConstraints.add_block_transition_constraints(
         model, shifts, self.residents, empty_schedule, self.block
         )
 
         
         #PTO Constaints
-        SchedulingConstraintsNew.add_pto_constraints(model, shifts, self.residents, self.block)
+        SchedulingConstraints.add_pto_constraints(model, shifts, self.residents, self.block)
 
         # Add staffing requirements
         for shift in empty_schedule:
